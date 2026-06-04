@@ -15,7 +15,7 @@ Invoked with no arguments. Be conservative — preserve signal, ignore noise.
    - decisions made
    - inconsistencies found and how they were resolved
    - structural / architectural changes
-   - external model opinions (Grok, Gemini) worth keeping
+   - outside model opinions worth keeping
 
 3. **Route each item to its home:**
    - decision or resolved inconsistency -> append a timestamped one-liner at the very END of

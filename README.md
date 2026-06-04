@@ -1,6 +1,6 @@
 # plainbrain
 
-**Plain files, whole brain.** A memory and knowledge system for [Claude Code](https://claude.com/claude-code) built from markdown, git, and three small shell scripts. No database, no daemons, no vector store, no subscriptions — and your AI stops forgetting what matters.
+**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and three small shell scripts. Wired for [Claude Code](https://claude.com/claude-code) out of the box, portable to any agent that can read instructions and run shell. No database, no daemons, no vector store, no subscriptions — and your AI stops forgetting what matters.
 
 ## The problem
 
@@ -47,7 +47,6 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 | `global/skills/wiki-ingest/` | Source → wiki: summary page, entity/concept updates, cross-links, contradiction flags, index + log |
 | `global/skills/wiki-query/` | Index-first retrieval, cited answers, offers to file durable answers back as new pages |
 | `global/skills/wiki-lint/` | Health check: deterministic `wiki-check.sh` pre-pass (dead links, index drift, orphans) + semantic review |
-| `global/skills/grok\|gemini\|perspectives/` | Optional: one-shot second opinions from outside models via OpenRouter — they advise, Claude executes |
 | `global/CLAUDE.md` | Lean global rules: plan discipline, git discipline, where things live |
 | `global/settings.json` | The hook wiring (merge into yours — don't overwrite) |
 | `wiki/` | Wiki scaffold: schema doc, index, log, overview |
@@ -55,7 +54,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 ## Install (5 minutes, manual on purpose)
 
-Requirements: Claude Code, git, bash. (`jq` + `curl` + an `OPENROUTER_API_KEY` only if you want the optional perspective skills.)
+Requirements: Claude Code, git, bash. That's the whole stack.
 
 ```sh
 git clone https://github.com/crodorg/plainbrain
@@ -123,6 +122,18 @@ Smaller novelties worth stealing even if you don't adopt the whole system:
 - **wip-commit safety nets.** Context compaction and session exits trigger deterministic snapshot commits. The next session lists them and asks: distill, keep, or discard. Laziness is a recoverable state.
 - **Deterministic verification.** `wiki-check.sh` proves the wiki's structural health (dead links, index drift, orphans) with zero AI involvement. Trust, but grep.
 
+## Not just Claude
+
+plainbrain ships wired for Claude Code because that's where it was born, but nothing about
+the *system* is Claude-specific. The memories are markdown. The hooks are plain shell scripts
+fired on ordinary lifecycle events (session start, context compaction, session end). The
+skills are natural-language instruction files — any capable model can follow them.
+
+To port it: re-wire the three hooks to your agent's equivalent events, and expose the skill
+files as instructions your agent loads on demand. The files themselves — `plan.md`,
+`decisions.md`, the wiki — don't care what reads them. That's the point: your accumulated
+knowledge shouldn't be hostage to this year's tool.
+
 ## Who this is for
 
 **A good fit if you:** live in Claude Code across multiple projects; want to *audit* what your AI remembers; accumulate research/decisions that deserve to outlive chat history; like plain text and git; work across machines (everything syncs as ordinary repos).
@@ -135,9 +146,8 @@ The dumb substrate makes extensions easy bolt-ons rather than migrations:
 
 - **Semantic search** — when `index.md` outgrows grep, add an embedding index *next to* the files. The files stay canonical; the index is disposable.
 - **Scheduled lint** — the system is deliberately cron-free (nothing runs behind your back), but `wiki-lint` supports a headless mode if you want a weekly CI job.
-- **More outside opinions** — `perspectives/ask.sh` takes any OpenRouter model ID; adding a model is a one-line skill edit.
+- **Outside opinions** — add a skill that relays a question to a second model (any API) and returns its take verbatim; durable opinions land in `decisions.md` like any other decision input.
 - **Team mode** — make `~/wiki` a shared repo; ingests become PRs; review becomes curation.
-- **Other agents** — almost nothing here is Claude-specific. The hooks are plain shell on documented events; the skills are instruction files any capable agent can follow. Port the wiring, keep the files.
 
 ## Inspiration
 
