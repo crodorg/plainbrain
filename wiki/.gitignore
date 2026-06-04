@@ -1,0 +1,8 @@
+# Claude Code session state (markers written by the hooks — must be ignored)
+.claude/state/
+
+# OS / editor junk
+.DS_Store
+*.swp
+*.swo
+*~

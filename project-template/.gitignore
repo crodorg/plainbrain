@@ -1,0 +1,15 @@
+# Claude Code session state (markers written by the hooks).
+# MUST be ignored — otherwise every wip snapshot commits its own state files and the
+# "is the tree clean?" check never reads clean.
+.claude/state/
+
+# Reference symlink (points into ~/data; not tracked).
+refs
+
+# OS / editor junk
+.DS_Store
+*.swp
+*.swo
+*~
+
+# --- add language-specific ignores below ---
