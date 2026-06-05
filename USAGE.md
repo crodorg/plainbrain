@@ -17,9 +17,11 @@ Everything durable that crosses your desk fits one of four homes:
 | An outside model's take that changed your mind | `decisions.md` | save-context keeps opinions that mattered |
 | How the deploy pipeline works | `<project>/ARCHITECTURE.md` | save-context routes structural facts |
 | A durable X-vs-Y analysis | `~/wiki/comparisons/` | wiki-query offers to file it back — say yes |
+| A standing fact about yourself ("I hate X in a mix") | `~/wiki/entities/me.md` | save-context proposes it |
 
 Routing rules of thumb:
-- **About one project's direction** → that project's `decisions.md` / `plan.md`
+- **About one project's direction** → that project's `decisions.md` / driver (`plan.md` or `CONTEXT.md`)
+- **About you as a person, beyond one project** → `~/wiki/entities/me.md`
 - **Fact about the world, useful across projects** → wiki
 - **Fleeting / personal / unformed** → notes, promoted later
 - **Raw artifact** → `~/data/<project>/`, ingested when it earns it
@@ -28,7 +30,7 @@ Routing rules of thumb:
 
 | Automatic (hooks, every session) | Manual (you trigger) |
 |---|---|
-| Session start: recent git log + "read plan.md" injected | "save context" at session end |
+| Session start: recent git log + "read the driver" injected | "save context" at session end |
 | Pre-compact: `wip:` commit — compaction can't lose work | "ingest <path>", "query the wiki", "lint the wiki" |
 | Session end: `wip:` rescue commit + reminder flag | notes capture, wiki-save / notes-save aliases |
 | Next session start: lists unsaved wip commits, asks what to do | "adopt this project" (once per project) |
@@ -47,6 +49,7 @@ $ cd ~/projects/myapp && claude
   # ...work happens. Mid-session you switch from Redis to LISTEN/NOTIFY. Say so.
 
 > save context
+  # → proposes 0–3 durable items with destinations; YOU approve — you are the noise gate
   # → decisions.md += "2026-06-11 18:02: dropped Redis for LISTEN/NOTIFY — one less daemon"
   # → plan.md phase status updated; ARCHITECTURE.md updated if structure changed
   # → commit with a real message

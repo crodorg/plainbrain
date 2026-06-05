@@ -15,7 +15,11 @@ git status --short 2>/dev/null | head -20
 echo
 git log --oneline -5 2>/dev/null
 echo
-[ -f plan.md ] && echo "### Plan: read ./plan.md — it is the driver for this project."
+if [ -f plan.md ]; then
+  echo "### Driver: read ./plan.md — it is the driver for this project."
+elif [ -f CONTEXT.md ]; then
+  echo "### Driver: read ./CONTEXT.md — it is the driver for this project."
+fi
 
 if [ -f .claude/state/.pending-save ]; then
   echo

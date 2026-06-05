@@ -3,11 +3,13 @@
 <one line: what this project is>
 
 ## Stack
-<languages, key deps, runtime>
+<languages, key deps, runtime — delete this section for non-code projects>
 
 ## Pointers
-- Plan / intent: `./plan.md`  — the driver; read it first
-- Codebase map: `./ARCHITECTURE.md`
+<!-- list ONLY the files this project carries; always name the driver -->
+- Driver: `./plan.md` — read it first   <!-- execution projects; creative/knowledge projects: ./CONTEXT.md -->
+- Standing knowledge: `./CONTEXT.md`    <!-- module — delete line if absent -->
+- Codebase map: `./ARCHITECTURE.md`     <!-- module — delete line if absent -->
 - Decision log: `./decisions.md`  — append-only: what changed and why
 - Reference material: `~/data/<name>/` (read-only; symlinked as `./refs` if present)
 

@@ -19,7 +19,7 @@ quick thoughts ──capture──────▶  ~/notes/            (git)    
 questions ──"query the wiki"──▶  cited answer ──filed back──────────────────────▶  (git)
 ```
 
-1. **Project state** — every repo carries `plan.md` (intent), `decisions.md` (append-only log of *what changed and why*, timestamped), and `ARCHITECTURE.md` (codebase map). The AI reads them at session start and updates them at session end.
+1. **Project state** — every repo carries `decisions.md` (append-only log of *what changed and why*, timestamped) plus the modules that fit: `plan.md` (intent, for projects that execute in phases), `CONTEXT.md` (standing knowledge — philosophy, taste, voice, constraints — for creative and idea projects), `ARCHITECTURE.md` (codebase map). The project's `CLAUDE.md` names which file is the **driver**; the AI reads it at session start and updates it at session end. There are no project "types" — hybrids compose modules.
 2. **Knowledge** — `~/wiki`: small, single-topic markdown pages (entities, concepts, comparisons, sources) cross-linked with relative links and cataloged in one `index.md`. The AI does the bookkeeping; you supervise.
 3. **Inbox** — `~/notes`: your own notes, a first-class source the wiki can ingest.
 
@@ -41,16 +41,16 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 | Path | What it is |
 |---|---|
-| `global/hooks/` | 3 hooks: session-start (inject git state + plan pointer + unsaved-work triage), pre-compact (wip snapshot), session-end (wip rescue + reminder flag) |
-| `global/skills/adopt-project/` | Bring any project — new or existing — into the layout: interview + drafted files, approved before written |
-| `global/skills/save-context/` | End-of-session distiller: routes durable facts into plan / decisions / architecture, commits |
+| `global/hooks/` | 3 hooks: session-start (inject git state + driver pointer + unsaved-work triage), pre-compact (wip snapshot), session-end (wip rescue + reminder flag) |
+| `global/skills/adopt-project/` | Bring any project — new or existing — into the layout: the interview picks the modules that fit; files drafted and approved before written |
+| `global/skills/save-context/` | End-of-session distiller: proposes 0–3 durable items for your approval, routes them to their homes, commits — you are the noise gate |
 | `global/skills/wiki-ingest/` | Source → wiki: summary page, entity/concept updates, cross-links, contradiction flags, index + log |
 | `global/skills/wiki-query/` | Index-first retrieval, cited answers, offers to file durable answers back as new pages |
 | `global/skills/wiki-lint/` | Health check: deterministic `wiki-check.sh` pre-pass (dead links, index drift, orphans) + semantic review |
 | `global/CLAUDE.md` | Lean global rules: plan discipline, git discipline, where things live |
 | `global/settings.json` | The hook wiring (merge into yours — don't overwrite) |
 | `wiki/` | Wiki scaffold: schema doc, index, log, overview |
-| `project-template/` | The four files every project carries |
+| `project-template/` | Core templates (CLAUDE.md, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
 
 ## Install (5 minutes, manual on purpose)
 
@@ -75,7 +75,7 @@ cat global/settings.json   # then merge by hand or let Claude do it
 cp -r global/skills/* ~/.claude/skills/
 
 # 4. global rules — read global/CLAUDE.md and merge what you like into
-#    ~/.claude/CLAUDE.md. The plan-discipline section is the load-bearing part.
+#    ~/.claude/CLAUDE.md. The project-discipline section is the load-bearing part.
 
 # 5. the four homes
 mkdir -p ~/projects ~/data ~/notes
@@ -120,6 +120,7 @@ Smaller novelties worth stealing even if you don't adopt the whole system:
 - **The contradiction ledger.** Wiki pages have a dated "Open questions / contradictions" section. New facts that conflict with old ones get *recorded as disagreement*, never silently overwritten. Your knowledge base admits uncertainty.
 - **The append-only decisions file.** One timestamped line per decision: `2026-06-04 16:45: chose X because Y`. Six months later, "why on earth did we do it this way?" is a grep, not an archaeology dig.
 - **wip-commit safety nets.** Context compaction and session exits trigger deterministic snapshot commits. The next session lists them and asks: distill, keep, or discard. Laziness is a recoverable state.
+- **A lazily-loaded self page.** Your standing philosophy, taste, and voice live in one wiki page (`~/wiki/entities/me.md`) behind a one-line global pointer — read when the work is creative or preference-sensitive, never taxing the context of an ordinary debugging session.
 - **Deterministic verification.** `wiki-check.sh` proves the wiki's structural health (dead links, index drift, orphans) with zero AI involvement. Trust, but grep.
 
 ## Not just Claude

@@ -1,39 +1,44 @@
 ---
 name: save-context
-description: Persist the meaningful state of the current Claude Code session into the project's durable files. Run at the end of a work session, before /exit, or whenever a decision or inconsistency has been resolved. Reads the project layout and routes each kind of information to its correct home, then commits.
+description: Persist the meaningful state of the current Claude Code session into the project's durable files. Run at the end of a work session, before /exit, or whenever a decision or inconsistency has been resolved. Proposes a short list of durable items for approval, routes each to its declared home, then commits.
 ---
 
 # save-context
 
-Invoked with no arguments. Be conservative — preserve signal, ignore noise.
+Invoked with no arguments. You propose; the user approves; only then do you write.
+**The user is the noise gate** — your job is a short, honest candidate list.
 
-1. **Locate the project.** `git rev-parse --show-toplevel`. Read `plan.md`, `decisions.md`,
-   and `ARCHITECTURE.md` if they exist.
+1. **Locate the project.** `git rev-parse --show-toplevel`. Read the project's CLAUDE.md
+   pointer block: it declares which durable files this project carries (core: decisions.md;
+   modules: plan.md, CONTEXT.md, ARCHITECTURE.md) and which one is the driver. Read the
+   declared files. Route ONLY to declared files — never create a missing module (no plan.md
+   in a project that doesn't plan). If a missing module seems genuinely needed, suggest
+   re-running adopt-project instead.
 
-2. **Review what actually happened this session.** Look at `git status` and `git diff`, plus
-   the conversation. Identify only *durable* facts:
-   - decisions made
-   - inconsistencies found and how they were resolved
-   - structural / architectural changes
-   - outside model opinions worth keeping
+2. **Extract candidates.** Review the conversation plus `git status` / `git diff`. Strictly
+   durable items only — things a future session would fail or redo work without: decisions
+   made, inconsistencies resolved, structural changes, outside opinions that changed a
+   decision. Before proposing a decisions.md entry, grep decisions.md — already recorded
+   means don't re-propose.
 
-3. **Route each item to its home:**
-   - decision or resolved inconsistency -> append a timestamped one-liner at the very END of
+3. **Propose, then WAIT for approval.** Present the candidates (typically 0–3) as a short
+   list, each with its destination:
+   - decision / resolved inconsistency → timestamped one-liner appended at the very END of
      `decisions.md` — newest entry is always the last line, never inserted mid-file
-     (`YYYY-MM-DD HH:MM: changed X because Y`); if the plan itself changed, update the relevant
-     **subsection** of `plan.md`. Never silently rewrite a stable section — if a stable
-     section must change, propose it and get the user's OK BEFORE writing it.
-   - new architectural fact -> update `ARCHITECTURE.md`
-   - external opinion worth keeping -> `decisions.md`
-   - reference material -> note its location under `~/data/`; do not commit large files
-   - cross-project insight (useful beyond this project) -> promote it into `~/wiki` with the
-     wiki-ingest skill, or jot a stub in `~/notes` for later ingest
-   - the project's `CLAUDE.md` contradicts the new reality -> flag it in your summary;
-     never edit CLAUDE.md from this skill
+     (`YYYY-MM-DD HH:MM: changed X because Y`; stamp from the system clock, never from memory)
+   - plan progressed or changed → the relevant **volatile subsection** of `plan.md`;
+     stable-section changes flagged loudly and shown in full
+   - standing knowledge for THIS project (direction, taste, constraints) → `CONTEXT.md`
+   - new architectural fact → `ARCHITECTURE.md`
+   - fact about the user as a person, useful beyond this project → `~/wiki/entities/me.md`
+   - cross-project world-fact → `~/wiki` (wiki-ingest)
+   - off-project or unformed → a stub note in `~/notes` (inbox), for later routing
+   - project CLAUDE.md contradicts reality → flag it in the list; never edit CLAUDE.md here
+   **If nothing durable changed, say so and stop.** Do not invent entries to look productive.
 
-4. **If nothing durable changed, say so and stop.** Do not invent entries to look productive.
+4. **Write exactly what was approved** — nothing more. Prefer append-only edits.
 
-5. **Commit.** Stage and commit with a clear message summarizing the session's real work.
+5. **Commit** with a clear message summarizing the session's real work.
 
 6. **Write the marker:**
    ```
@@ -42,4 +47,4 @@ Invoked with no arguments. Be conservative — preserve signal, ignore noise.
    rm -f .claude/state/.pending-save
    ```
 
-Prefer append-only edits. Preserve the *why*, not just the *what* — git already has the what.
+Preserve the *why*, not just the *what* — git already has the what.

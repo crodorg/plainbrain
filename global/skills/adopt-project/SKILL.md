@@ -1,12 +1,22 @@
 ---
 name: adopt-project
-description: Bring a project into the knowledge-system layout — git repo, gitignored .claude/state/, and the four kit files (CLAUDE.md, plan.md, decisions.md, ARCHITECTURE.md) with real content. Works on existing projects AND brand-new empty dirs (template + interview). Use when the user says "adopt this project", "convert this to the kit", "new project", or kit-style work starts in a repo lacking plan.md. Drafts everything for approval before writing.
+description: Bring a project into the knowledge-system layout — git repo, gitignored .claude/state/, the universal core (CLAUDE.md + decisions.md) plus only the modules that fit (plan.md for phased execution, ARCHITECTURE.md for a codebase, CONTEXT.md for standing knowledge). Works on existing projects, brand-new empty dirs, AND already-adopted projects that need a module added or dropped. Use when the user says "adopt this project", "convert this to the kit", "new project", or kit-style work starts in a repo lacking kit files. Drafts everything for approval before writing.
 ---
 
 # adopt-project
 
-Run inside the project directory. Goal: the four kit files with real content,
-nothing clobbered, hooks live. Adoption is a conversation, not a scan.
+Run inside the project directory. Goal: the core plus the modules that earn their keep,
+with real content, nothing clobbered, hooks live. Adoption is a conversation, not a scan.
+
+**Core (every project):** git repo + `CLAUDE.md` + `decisions.md`.
+**Modules (only where they fit):**
+- `plan.md` — there is phased execution to drive (driver for execution projects)
+- `ARCHITECTURE.md` — there is a codebase to map
+- `CONTEXT.md` — Claude needs standing knowledge to work here: philosophy, taste, voice,
+  audience, domain constraints (driver for creative/knowledge projects)
+
+No project "types" — hybrids compose modules (a website can carry CONTEXT.md *and*
+plan.md). Modules are added or dropped later by re-running this skill.
 
 1. **Survey.** Is it a git repo? If not, flag that hooks have been inert here and
    `git init` (with user OK) + a sensible .gitignore is step one. Read existing
@@ -14,21 +24,31 @@ nothing clobbered, hooks live. Adoption is a conversation, not a scan.
    `~/data/<name>/` if present for prior working state.
 2. **Gitignore.** Ensure `.claude/state/` is ignored; `git rm -r --cached` any
    already-tracked markers.
-3. **Interview.** 3-5 short questions: current goal, what's in flight, what's
-   locked, what's next. Don't guess intent from code.
-4. **Draft all four files, show them, get approval BEFORE writing any:**
-   - `CLAUDE.md` — merge with existing (keep their rules, add kit pointers
-     block from the `project-template/` directory of this kit, wherever it
-     was cloned). Lean.
-   - `plan.md` — Goal/Constraints/Decisions (stable) + phased Status (volatile)
-     from interview + survey. Mark unknowns explicitly; never invent.
-   - `decisions.md` — template header; seed 3-8 timestamped entries for big
-     already-made decisions surfaced by the interview (marked retroactive).
-   - `ARCHITECTURE.md` — codebase map from an actual scan: entry points, layout,
-     data flow, how to build/run. Sized to the project: a script gets 10 lines,
-     a service gets a page.
-5. **Commit** (`adopt: knowledge-system layout`). If prior working state looked
-   rich, suggest wiki-ingest for it.
+3. **Interview.** FIRST question: what kind of work happens here — building in phases,
+   collecting ideas, writing, a creative practice? That picks the modules. Then 3-5
+   short questions: current goal or direction, what's in flight, what's locked, what
+   Claude must know to work well here. Don't guess intent from files.
+4. **Draft every chosen file, show them all, get approval BEFORE writing any:**
+   - `CLAUDE.md` — merge with existing (keep their rules, add the pointer block from
+     the `project-template/` directory of this kit, wherever it was cloned). The
+     pointer block lists
+     ONLY the files this project carries and names the **driver** (plan.md or
+     CONTEXT.md). Lean.
+   - `decisions.md` — template header; seed timestamped entries for big already-made
+     decisions surfaced by the interview (marked retroactive).
+   - `plan.md` (if chosen) — Goal/Constraints/Decisions (stable) + phased Status
+     (volatile) from interview + survey. Mark unknowns explicitly; never invent.
+   - `CONTEXT.md` (if chosen) — stable sections (philosophy / taste / constraints) +
+     volatile Current direction. Project-specific knowledge only: user-level facts
+     belong in `~/wiki/entities/me.md` — link it, don't copy it.
+   - `ARCHITECTURE.md` (if chosen) — codebase map from an actual scan: entry points,
+     layout, data flow, how to build/run. Sized to the project: a script gets 10
+     lines, a service gets a page.
+5. **Commit** (`adopt: knowledge-system layout`). If prior working state looked rich,
+   suggest wiki-ingest for it.
 
-Never overwrite an existing plan.md / decisions.md / ARCHITECTURE.md without
-explicit OK — merge or extend instead.
+**Re-adoption** (kit files already present): survey what exists vs what fits, propose
+only the delta — add the missing module, or flag one that never earned its keep
+(dropping needs explicit user OK; git keeps the history). Never overwrite an existing
+plan.md / decisions.md / CONTEXT.md / ARCHITECTURE.md without explicit OK — merge or
+extend instead.
