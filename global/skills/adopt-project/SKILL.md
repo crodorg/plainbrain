@@ -1,6 +1,6 @@
 ---
 name: adopt-project
-description: Bring a project into the knowledge-system layout — git repo, gitignored .claude/state/, the universal core (CLAUDE.md + decisions.md) plus only the modules that fit (plan.md for phased execution, ARCHITECTURE.md for a codebase, CONTEXT.md for standing knowledge). Works on existing projects, brand-new empty dirs, AND already-adopted projects that need a module added or dropped. Use when the user says "adopt this project", "convert this to the kit", "new project", or kit-style work starts in a repo lacking kit files. Drafts everything for approval before writing.
+description: Bring a project into the knowledge-system layout — git repo, gitignored .claude/state/, core (CLAUDE.md + decisions.md) plus only the modules that fit (plan.md, ARCHITECTURE.md, CONTEXT.md). Works on existing, brand-new, and already-adopted projects (add/drop a module). Use on "adopt this project", "convert this to the kit", "new project", or kit-style work in a repo lacking kit files. Drafts everything for approval before writing.
 ---
 
 # adopt-project
