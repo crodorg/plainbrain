@@ -10,7 +10,7 @@ Invoked with no arguments. You propose; the user approves; only then do you writ
 
 0. **Pre-check.** Run `~/.claude/skills/save-context/check.sh`. On `SAVED` or `CLEAN`,
    scan the conversation for any durable item NOT already in the files (including wiki
-   candidates, step 2) — if there is none, report "already saved" citing the commits
+   and skill candidates, step 2) — if there is none, report "already saved" citing the commits
    from the check output, write the marker (step 6), and STOP. Read nothing else.
    On `UNSAVED` or `COMMITS-NO-DURABLES`, continue with the full skill.
 
@@ -29,7 +29,15 @@ Invoked with no arguments. You propose; the user approves; only then do you writ
    Then a **wiki sweep**: did the session produce knowledge that is durable (true in 6+
    months), cross-project, about the world (not this repo's internals), and cost real
    effort to learn? Propose it as a wiki candidate naming the target page (full litmus
-   in `~/wiki/CLAUDE.md`). Most sessions produce none — that's the expected answer.
+   in `~/wiki/CLAUDE.md`).
+   Then a **skill sweep** — two questions:
+   - Capture: did the session converge on a repeatable, non-obvious procedure (took
+     iteration to get right, will plausibly run again)? Propose a skill draft —
+     project-bound → `.claude/skills/` in the repo; cross-project → `~/.claude/skills/`.
+     Facts go to the wiki; procedures become skills.
+   - Repair: did an existing skill misfire or show stale instructions this session?
+     Propose the minimal SKILL.md fix.
+   Most sessions produce no wiki or skill candidates — that's the expected answer.
 
 3. **Propose, then WAIT for approval.** Present the candidates (typically 0–3) as a short
    list, each with its destination:
@@ -44,6 +52,8 @@ Invoked with no arguments. You propose; the user approves; only then do you writ
    - cross-project world-fact passing the wiki litmus → a page in `~/wiki`, filed
      directly (update index.md; log.md entry noting "filed from session"); full
      wiki-ingest only when a real source file exists in `~/data` or `~/notes`
+   - repeatable procedure (capture) or skill misfire (repair) → a SKILL.md draft or
+     minimal fix, shown in full before writing
    - off-project or unformed → a stub note in `~/notes` (inbox), for later routing
    - project CLAUDE.md contradicts reality → flag it in the list; never edit CLAUDE.md here
    **If nothing durable changed, say so and stop.** Do not invent entries to look productive.
