@@ -49,7 +49,9 @@ $ cd ~/projects/myapp && claude
   # ...work happens. Mid-session you switch from Redis to LISTEN/NOTIFY. Say so.
 
 > save context
-  # → proposes 0–3 durable items with destinations; YOU approve — you are the noise gate
+  # → pre-check first: if everything already landed mid-session, says "already saved" and
+  #   exits in one step — running it costs nothing
+  # → otherwise proposes 0–3 durable items with destinations; YOU approve — the noise gate
   # → decisions.md += "2026-06-11 18:02: dropped Redis for LISTEN/NOTIFY — one less daemon"
   # → plan.md phase status updated; ARCHITECTURE.md updated if structure changed
   # → commit with a real message

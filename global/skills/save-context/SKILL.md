@@ -8,6 +8,12 @@ description: Persist the meaningful state of the current Claude Code session int
 Invoked with no arguments. You propose; the user approves; only then do you write.
 **The user is the noise gate** — your job is a short, honest candidate list.
 
+0. **Pre-check.** Run `~/.claude/skills/save-context/check.sh`. On `SAVED` or `CLEAN`,
+   scan the conversation for any durable item NOT already in the files (including wiki
+   candidates, step 2) — if there is none, report "already saved" citing the commits
+   from the check output, write the marker (step 6), and STOP. Read nothing else.
+   On `UNSAVED` or `COMMITS-NO-DURABLES`, continue with the full skill.
+
 1. **Locate the project.** `git rev-parse --show-toplevel`. Read the project's CLAUDE.md
    pointer block: it declares which durable files this project carries (core: decisions.md;
    modules: plan.md, CONTEXT.md, ARCHITECTURE.md) and which one is the driver. Read the
@@ -20,6 +26,10 @@ Invoked with no arguments. You propose; the user approves; only then do you writ
    made, inconsistencies resolved, structural changes, outside opinions that changed a
    decision. Before proposing a decisions.md entry, grep decisions.md — already recorded
    means don't re-propose.
+   Then a **wiki sweep**: did the session produce knowledge that is durable (true in 6+
+   months), cross-project, about the world (not this repo's internals), and cost real
+   effort to learn? Propose it as a wiki candidate naming the target page (full litmus
+   in `~/wiki/CLAUDE.md`). Most sessions produce none — that's the expected answer.
 
 3. **Propose, then WAIT for approval.** Present the candidates (typically 0–3) as a short
    list, each with its destination:
@@ -31,7 +41,9 @@ Invoked with no arguments. You propose; the user approves; only then do you writ
    - standing knowledge for THIS project (direction, taste, constraints) → `CONTEXT.md`
    - new architectural fact → `ARCHITECTURE.md`
    - fact about the user as a person, useful beyond this project → `~/wiki/entities/me.md`
-   - cross-project world-fact → `~/wiki` (wiki-ingest)
+   - cross-project world-fact passing the wiki litmus → a page in `~/wiki`, filed
+     directly (update index.md; log.md entry noting "filed from session"); full
+     wiki-ingest only when a real source file exists in `~/data` or `~/notes`
    - off-project or unformed → a stub note in `~/notes` (inbox), for later routing
    - project CLAUDE.md contradicts reality → flag it in the list; never edit CLAUDE.md here
    **If nothing durable changed, say so and stop.** Do not invent entries to look productive.

@@ -18,6 +18,20 @@ you curate sources, ask questions, and may hand-edit any page. It is plain markd
   _lint/           # dated lint reports
 ```
 
+## What belongs here (litmus)
+
+File a fact only if ALL four hold:
+1. **Durable** — still true and useful in 6+ months (not status, not WIP).
+2. **Cross-project** — would serve a different project or a future question.
+3. **About the world** — entities, concepts, methods, comparisons; not one repo's internals.
+4. **Cost something to learn** — research, a debugging discovery, an outside opinion;
+   cheap-to-rederive facts don't compound.
+
+Fails the test → route down: project-only knowledge → that project's CONTEXT.md /
+ARCHITECTURE.md; about the user as a person → `entities/me.md`; ephemeral → nowhere.
+Knowledge born in conversation (no source file) is filed directly as a page — update
+`index.md`, note "filed from session" in `log.md`; `wiki-ingest` is for real source files.
+
 ## Sources live elsewhere
 
 Raw material is **not** stored here. It lives in `~/data` (external/raw files, no git) and
