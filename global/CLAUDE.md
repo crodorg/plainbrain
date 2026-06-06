@@ -65,6 +65,8 @@ plan. For any non-trivial task, propose the plan first and wait for my go-ahead.
 - No error handling for impossible scenarios.
 - If you write 200 lines and it could be 50, rewrite it.
 - Ask: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
+- After non-trivial code changes, run the built-in `simplify` pass yourself before
+  committing — automatic, never something I have to ask for.
 
 ### 3. Surgical Changes
 **Touch only what you must. Clean up only your own mess.**
