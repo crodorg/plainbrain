@@ -1,5 +1,5 @@
 #!/bin/sh
-# check.sh — deterministic save-context pre-check. No AI, no network.
+# check.sh — deterministic distill pre-check. No AI, no network.
 # Answers: is there anything left to save this session? Reads the existing
 # .claude/state/.session-start marker + git. First line is the verdict:
 #   UNSAVED              dirty working tree                          -> full skill
@@ -26,7 +26,7 @@ if [ "${start:-0}" -le 0 ] 2>/dev/null; then
   exit 0
 fi
 
-# Commits since session start (same %ct + awk pattern as session-start.sh).
+# Commits since session start (same %ct + awk pattern as session-start-git.sh).
 commits=$(git log -100 --format='%ct%x09%h %s' 2>/dev/null \
   | awk -F'\t' -v s="$start" '$1+0 > s+0 { print $2 }')
 if [ -z "$commits" ]; then

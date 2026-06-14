@@ -1,10 +1,11 @@
 #!/bin/sh
 # wiki-check.sh — deterministic structural checks for the wiki. No AI, no network.
 # Run by wiki-lint as a mechanical pre-pass, or by hand any time.
-# Usage: wiki-check.sh [wiki-root]     (default: ~/wiki)
+# Usage: wiki-check.sh [wiki-root]     (default: $PLAINBRAIN_WIKI, else ~/wiki)
 # Exit: 0 clean, 1 findings, 2 wiki not found.
 
-WIKI="${1:-$HOME/wiki}"
+[ -f "$HOME/.config/plainbrain/env" ] && . "$HOME/.config/plainbrain/env"
+WIKI="${1:-${PLAINBRAIN_WIKI:-$HOME/wiki}}"
 cd "$WIKI" || { echo "wiki-check: no wiki at $WIKI" >&2; exit 2; }
 
 pages=$(find entities concepts comparisons sources -name '*.md' 2>/dev/null | sort)
@@ -47,7 +48,54 @@ out=$(
     done
     [ "$hit" -eq 0 ] && echo "orphan candidate (no inbound page links): $p"
   done
+
+  # 5. Source pages whose source-path is missing or no longer resolves.
+  for p in sources/*.md; do
+    [ -f "$p" ] || continue
+    sp=$(grep -m1 '^source-path:' "$p" | sed 's/^source-path: *//')
+    if [ -z "$sp" ]; then echo "no source-path: $p"; continue; fi
+    case "$sp" in "~/"*) sp="$HOME/${sp#\~/}" ;; esac
+    [ -e "$sp" ] || echo "source-path missing: $p -> $sp"
+  done
+
+  # 6. Unattributed claim bullets in a concept page "## The map" section.
+  for p in concepts/*.md; do
+    [ -f "$p" ] || continue
+    awk -v f="$p" '
+      /^#/ { inmap = ($0 ~ /^#+ The map/) ? 1 : 0; next }
+      inmap && /^- / && $0 !~ /^- Per / && $0 !~ /comparisons\// {
+        print "unattributed map line: " f " :: " $0 }
+    ' "$p"
+  done
 )
+
+# Coverage rollup (informational; gaps are expected, not failures).
+# How many top-level data source-dirs have at least one citing wiki page.
+DATA="${PLAINBRAIN_DATA:-$HOME/data}"
+if [ -d "$DATA" ]; then
+  refs=$(grep -hR '^source-path:' sources 2>/dev/null)
+  total=0; covered=0; gaps=""
+  for d in "$DATA"/*/; do
+    [ -d "$d" ] || continue
+    total=$((total + 1)); name=$(basename "$d")
+    if printf '%s\n' "$refs" | grep -q "/$name/"; then
+      covered=$((covered + 1))
+    else
+      gaps="$gaps $name"
+    fi
+  done
+  [ "$total" -gt 0 ] && printf 'coverage: %s/%s data source-dirs have >=1 page%s\n' \
+    "$covered" "$total" "${gaps:+ — dark:$gaps}"
+fi
+
+# Scale advisories (informational) — the documented split thresholds, never a failure.
+idx=$(grep -c '\.md)' index.md 2>/dev/null)
+[ "${idx:-0}" -gt 300 ] && printf 'scale: index.md has %s entries (>300) — consider per-category index shards\n' "$idx"
+big=$(for p in $pages; do
+  n=$(wc -l < "$p" 2>/dev/null | tr -d ' ')
+  [ "${n:-0}" -gt 150 ] && printf '  %s (%s lines)\n' "$p" "$n"
+done)
+[ -n "$big" ] && { echo 'scale: pages over ~150 lines (split — one concept per file):'; printf '%s\n' "$big"; }
 
 count=$(printf '%s\n' "$pages" | grep -c . )
 if [ -n "$out" ]; then

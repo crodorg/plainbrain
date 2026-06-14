@@ -9,15 +9,15 @@ Everything durable that crosses your desk fits one of four homes:
 
 | You have... | It goes to... | How it gets there |
 |---|---|---|
-| Decided to use LISTEN/NOTIFY instead of Redis | `<project>/decisions.md` | "save context" at session end |
+| Decided to use LISTEN/NOTIFY instead of Redis | `<project>/decisions.md` | "distill" at session end |
 | A competitor's Q1 earnings PDF | `~/data/<project>/`, then the wiki | `cp` it there; "ingest ~/data/acme/q1.pdf" |
 | Learned a durable fact about a company/tool | `~/wiki/entities/` | falls out of an ingest, or "file this into the wiki" |
 | A shower thought | `~/notes` | however you capture notes |
 | "Which vendors did we rule out, and why?" | answered FROM the wiki | "query the wiki: …" |
-| An outside model's take that changed your mind | `decisions.md` | save-context keeps opinions that mattered |
-| How the deploy pipeline works | `<project>/ARCHITECTURE.md` | save-context routes structural facts |
+| An outside model's take that changed your mind | `decisions.md` | distill keeps opinions that mattered |
+| How the deploy pipeline works | `<project>/ARCHITECTURE.md` | distill routes structural facts |
 | A durable X-vs-Y analysis | `~/wiki/comparisons/` | wiki-query offers to file it back — say yes |
-| A standing fact about yourself ("I hate X in a mix") | `~/wiki/entities/me.md` | save-context proposes it |
+| A standing fact about yourself ("I hate X in a mix") | `~/wiki/entities/me.md` | distill proposes it |
 
 Routing rules of thumb:
 - **About one project's direction** → that project's `decisions.md` / driver (`plan.md` or `CONTEXT.md`)
@@ -28,16 +28,19 @@ Routing rules of thumb:
 
 ## Automatic vs. manual
 
-| Automatic (hooks, every session) | Manual (you trigger) |
+| Automatic (hooks, adopted repos) | Manual (you trigger) |
 |---|---|
-| Session start: recent git log + "read the driver" injected | "save context" at session end |
-| Pre-compact: `wip:` commit — compaction can't lose work | "ingest <path>", "query the wiki", "lint the wiki" |
-| Session end: `wip:` rescue commit + reminder flag | notes capture, wiki-save / notes-save aliases |
-| Next session start: lists unsaved wip commits, asks what to do | "adopt this project" (once per project) |
+| Session start: recent git log + "read the driver" injected | "distill" at session end |
+| Pre-compact: snapshot to a private ref — compaction can't lose work | "ingest <path>", "query the wiki", "lint the wiki" |
+| Session end: private-ref snapshot + pending flag (if dirty) | notes capture, wiki-save / notes-save aliases |
+| (hooks stay inert until you adopt a repo) | "adopt this project" (once per project) |
 
-The marker handshake (`.claude/state/`): saving context writes `.last-save` and clears the
-flag. Exiting *without* saving sets `.pending-save`; the next session start lists every commit
-since the last save and asks: **distill / keep accumulating / discard**. Lazy is recoverable.
+The hooks run only in repos you've **adopted** (a `.claude/plainbrain` marker); un-adopted repos
+are untouched. The marker handshake (`.claude/state/`): distill writes `.last-distill` and clears
+the flag. Exiting *without* distilling snapshots the tree to a private ref
+(`refs/plainbrain/wip/<session>`, never a branch commit) and sets `.pending-distill`; the next
+session start flags it and you **distill / keep accumulating / recover (`plainbrain wip`) /
+discard**. Lazy is recoverable.
 
 ## Loop 1 — a project work session
 
@@ -48,18 +51,20 @@ $ cd ~/projects/myapp && claude
 > continue phase 2, the queue worker
   # ...work happens. Mid-session you switch from Redis to LISTEN/NOTIFY. Say so.
 
-> save context
-  # → pre-check first: if everything already landed mid-session, says "already saved" and
-  #   exits in one step — running it costs nothing
-  # → otherwise proposes 0–3 durable items with destinations; YOU approve — the noise gate
-  # → decisions.md += "2026-06-11 18:02: dropped Redis for LISTEN/NOTIFY — one less daemon"
-  # → plan.md phase status updated; ARCHITECTURE.md updated if structure changed
-  # → commit with a real message
+> distill
+  # → pre-check first: decisions already logged mid-session, tree clean? says "nothing to
+  #   distill" and exits in one step — running it costs nothing
+  # → otherwise it SWEEPS: proposes 0–3 candidates — a wiki page, a new/repaired skill, a fact
+  #   about you — plus any decision you didn't log inline; YOU approve each — the noise gate
+  # → decisions.md / plan.md get the reconcile only if something was missed (you mostly write
+  #   those as you work, not here); ARCHITECTURE.md too if structure changed
+  # → one clean commit with a real message
 ```
 
-Close the laptop without saving? A `wip:` commit lands and the next session opens by asking
-about it. Some projects never need saving at all — if the files ARE the context (dotfiles,
-configs), the wip commits are already the perfect log.
+Close the laptop without distilling? In an adopted repo the dirty tree is snapshotted to a
+private ref and the next session opens by asking about it (`plainbrain wip` recovers it). Many
+sessions surface nothing to distill — that's the expected answer: decisions already landed in
+`decisions.md` when you made them; distill is only the end-of-session sweep.
 
 ## Loop 2 — feeding the wiki
 
@@ -99,8 +104,8 @@ are a first-class source, same as `~/data`.
 
 | When | What |
 |---|---|
-| End of every work session | "save context" (or trust the wip safety net) |
-| Before a manual `/compact` in a decision-heavy session | "save context" first — hooks snapshot files, not conversation |
+| End of every work session | "distill" (or trust the snapshot safety net) |
+| Before a manual `/compact` in a decision-heavy session | make sure open decisions are in `decisions.md` first — the snapshot saves files, not the conversation |
 | Material arrives | drop in `~/data/<project>/`; ingest when it earns it |
 | Weekly-ish | commit your notes (`notes-save`) |
 | Monthly-ish, or after hand-editing the wiki | "lint the wiki", then `wiki-save` |
@@ -110,8 +115,8 @@ are a first-class source, same as `~/data`.
 
 | Went wrong | The system already did | You do |
 |---|---|---|
-| Exited without saving | `wip:` commit + flag | next session asks; pick distill |
-| Compaction mid-task | pre-compact `wip:` commit | nothing — keep working |
+| Exited without distilling | private-ref snapshot + flag | next session asks; distill or `plainbrain wip` |
+| Compaction mid-task | pre-compact private-ref snapshot | nothing — keep working |
 | Hand-edited wiki, links stale | nothing (your edits are yours) | "lint the wiki" reconciles |
 | "When did we decide X?" | decisions.md is append-only + timestamped | grep it |
 | Wiki page contradicts a new source | ingest flagged + dated it | resolve when you know |

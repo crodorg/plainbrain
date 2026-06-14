@@ -13,7 +13,7 @@ Meanwhile, the actual knowledge you accumulate — research, comparisons, hard-w
 Turn implicit memory into **three explicit memories, each a plain file you can read**:
 
 ```
-conversation ──"save context"──▶  <project>/plan.md + decisions.md    (project state)
+conversation ──"distill"───────▶  <project>/plan.md + decisions.md    (project state)
 raw documents ──drop──────────▶  ~/data/<project>/   (no git)  ──┐
 quick thoughts ──capture──────▶  ~/notes/            (git)      ──┤──"ingest"──▶  ~/wiki
 questions ──"query the wiki"──▶  cited answer ──filed back──────────────────────▶  (git)
@@ -23,9 +23,9 @@ questions ──"query the wiki"──▶  cited answer ──filed back──�
 2. **Knowledge** — `~/wiki`: small, single-topic markdown pages (entities, concepts, comparisons, sources) cross-linked with relative links and cataloged in one `index.md`. The AI does the bookkeeping; you supervise.
 3. **Inbox** — `~/notes`: your own notes, a first-class source the wiki can ingest.
 
-Three hooks make git self-maintaining: session start injects recent git history and a pointer to the plan; before context compaction a `wip:` commit snapshots everything; on exit, unsaved work gets rescued into a `wip:` commit and the next session opens by asking what to do with it. **Forgetting to save is always recoverable.**
+Three hooks keep git honest in any project you've **adopted**: session start injects recent git history and a pointer to the driver; before context compaction and on exit, work is snapshotted to a *private ref* — recoverable, but never a commit on your branch — and the next session opens by asking what to do with it. Un-adopted repos are left completely alone (no orientation, no snapshots, no surprises). **Forgetting to save is always recoverable.**
 
-The day-to-day surface is two commands: *adopt a project once, save context at the end of sessions.* Everything else is automatic (hooks) or on-demand (ask the wiki, ingest a document).
+The day-to-day surface is two commands: *adopt a project once, distill at the end of sessions.* Everything else is automatic (hooks) or on-demand (ask the wiki, ingest a document).
 
 ## Dumb and smart at the same time
 
@@ -33,7 +33,7 @@ This is the design thesis, and the reason the system should still work years fro
 
 **The substrate is deliberately dumb.** Markdown files. POSIX shell. Git. An "index" that is literally a list of links. A validator that is 60 lines of grep. There is nothing to install, migrate, host, or debug at 2am. Every single thing the AI "remembers" is a line in a file you can read, grep, hand-edit, and `git diff`. When the AI is wrong about something, you can see exactly where and fix it with a text editor.
 
-**The smart layer is rented at runtime.** The skills — ingest, query, lint, save-context, adopt-project — are plain-English instruction files the model reads when invoked. The intelligence (what matters, what contradicts what, where a fact belongs, what to cross-link) is applied fresh by whatever model you run, with judgment, in conversation with you. When models get smarter, this whole system gets smarter, with zero code changes.
+**The smart layer is rented at runtime.** The skills — ingest, query, lint, distill, adopt-project — are plain-English instruction files the model reads when invoked. The intelligence (what matters, what contradicts what, where a fact belongs, what to cross-link) is applied fresh by whatever model you run, with judgment, in conversation with you. When models get smarter, this whole system gets smarter, with zero code changes.
 
 Dumb substrate, smart runtime. Systems built the other way around — smart substrate (embeddings, schemas, agents-with-state) — rot when their runtime assumptions change. Files don't rot.
 
@@ -41,70 +41,60 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 | Path | What it is |
 |---|---|
-| `global/hooks/` | 3 hooks: session-start (inject git state + driver pointer + unsaved-work triage), pre-compact (wip snapshot), session-end (wip rescue + reminder flag) |
+| `global/hooks/` | 3 hooks, **inert until a repo is adopted**: session-start (inject git state + driver pointer + pending-work flag), pre-compact + session-end (snapshot the tree to a private ref) |
 | `global/skills/adopt-project/` | Bring any project — new or existing — into the layout: the interview picks the modules that fit; files drafted and approved before written |
-| `global/skills/save-context/` | End-of-session distiller: proposes 0–3 durable items for your approval, routes them to their homes, commits — you are the noise gate |
+| `global/skills/distill/` | The end-of-session sweep: proposes 0–3 durable wiki/skill/me.md items for your approval, routes them to their homes, commits — you are the noise gate |
 | `global/skills/wiki-ingest/` | Source → wiki: summary page, entity/concept updates, cross-links, contradiction flags, index + log |
 | `global/skills/wiki-query/` | Index-first retrieval, cited answers, offers to file durable answers back as new pages |
-| `global/skills/wiki-lint/` | Health check: deterministic `wiki-check.sh` pre-pass (dead links, index drift, orphans) + semantic review |
+| `global/skills/wiki-lint/` | Health check: deterministic `wiki-check.sh` pre-pass (dead links, index drift, orphans, scale advisories) + semantic review |
+| `global/bin/plainbrain` | List, recover, or prune the private-ref snapshots (`plainbrain wip`) |
 | `global/CLAUDE.md` | Lean global rules: plan discipline, git discipline, where things live |
-| `global/settings.json` | The hook wiring (merge into yours — don't overwrite) |
+| `global/settings.json` | The hook wiring (merged into yours — never overwritten) |
+| `install.sh` / `update.sh` | Idempotent, backup-first installer + kit-file updater |
 | `wiki/` | Wiki scaffold: schema doc, index, log, overview |
 | `project-template/` | Core templates (CLAUDE.md, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
 
-## Install (5 minutes, manual on purpose)
+## Install
 
 Requirements: Claude Code, git, bash. That's the whole stack.
 
 ```sh
 git clone https://github.com/crodorg/plainbrain
 cd plainbrain
+./install.sh
+```
 
-# 1. hooks
-mkdir -p ~/.claude/hooks
-cp global/hooks/*.sh ~/.claude/hooks/ && chmod +x ~/.claude/hooks/*.sh
+`install.sh` is idempotent and backup-first — it never clobbers your data or merged config. It creates the four homes and scaffolds an empty wiki, installs the hooks / skills / `plainbrain` CLI / project template into `~/.claude`, installs `global/CLAUDE.md` only if you don't already have one (otherwise saves it as `CLAUDE.md.plainbrain-new` to merge), merges **only** the hooks block into your `settings.json` (with `jq` if present, else prints it to paste — your permissions/env/statusLine are never touched), and writes `~/.config/plainbrain/env`.
 
-# 2. settings — MERGE, don't overwrite. If you already have hooks in
-#    ~/.claude/settings.json, add these entries alongside yours.
-#    (Already have a SessionStart hook? Install ours under a different
-#    filename, e.g. session-start-git.sh, and register it as a second entry —
-#    hooks stack additively.)
-cat global/settings.json   # then merge by hand or let Claude do it
+It's all shell — read it before you run it. Re-run it any time; `./update.sh` later refreshes just the kit-owned files (hooks, skills, CLI, template) without touching your config or data.
 
-# 3. skills
-cp -r global/skills/* ~/.claude/skills/
+**Relocating the homes.** Each home honors a `$PLAINBRAIN_*` env var (`WIKI`, `DATA`, `PROJECTS`, `NOTES`), defaulting to `~/wiki|data|projects|notes`. Edit `~/.config/plainbrain/env`, then add this to your shell rc so both the hooks and Claude inherit it:
 
-# 4. global rules — read global/CLAUDE.md and merge what you like into
-#    ~/.claude/CLAUDE.md. The project-discipline section is the load-bearing part.
-
-# 5. the four homes
-mkdir -p ~/projects ~/data ~/notes
-cp -r wiki ~/wiki
-mkdir -p ~/wiki/{entities,concepts,comparisons,sources,_lint}
-git -C ~/wiki init && git -C ~/wiki add -A && git -C ~/wiki commit -m "init wiki"
+```sh
+[ -f ~/.config/plainbrain/env ] && . ~/.config/plainbrain/env
 ```
 
 Optional shell aliases for the two repos nothing auto-commits:
 
 ```sh
-alias wiki-save='git -C ~/wiki add -A && git -C ~/wiki commit -m "wiki: $(date -u +%FT%TZ)"'
-alias notes-save='git -C ~/notes add -A && git -C ~/notes commit -m "notes: $(date -u +%FT%TZ)"'
+alias wiki-save='W="${PLAINBRAIN_WIKI:-$HOME/wiki}"; git -C "$W" add -A && git -C "$W" commit -m "wiki: $(date -u +%FT%TZ)"'
+alias notes-save='N="${PLAINBRAIN_NOTES:-$HOME/notes}"; git -C "$N" add -A && git -C "$N" commit -m "notes: $(date -u +%FT%TZ)"'
 ```
 
-Verify: open Claude Code in any git repo and check the injected "Session context" block (Ctrl+O shows hook output), or look for `.claude/state/.session-start`.
+Verify: in a repo, run "adopt this project" to activate it, then open Claude Code and check the injected "Session context" block (Ctrl+O shows hook output), or look for `.claude/state/.session-start`.
 
 ## Daily use
 
 | When | You do |
 |---|---|
 | Project's first contact (new or existing) | "adopt this project" — once, ever |
-| End of a work session | "save context" — the one habit |
+| End of a work session | "distill" — the one habit |
 | A document worth keeping arrives | drop it in `~/data/<project>/`, then "ingest this into the wiki" |
 | You need something you once knew | "query the wiki: …" — answer comes back with file citations |
 | A passing thought | capture to `~/notes` however you like; promote to the wiki later |
 | Monthly-ish | "lint the wiki" — contradictions, dead links, orphans |
 
-And what you *don't* do: you never manually log what happened (hooks commit snapshots with timestamps), never organize the wiki by hand (ingest does the filing, lint does the auditing), and never lose work to a crashed or forgotten session (wip commits + next-session triage).
+And what you *don't* do: you never organize the wiki by hand (ingest does the filing, lint does the auditing), and you never lose work to a crashed or forgotten session (private-ref snapshots + next-session triage).
 
 ## What's actually different here
 
@@ -119,7 +109,7 @@ Smaller novelties worth stealing even if you don't adopt the whole system:
 
 - **The contradiction ledger.** Wiki pages have a dated "Open questions / contradictions" section. New facts that conflict with old ones get *recorded as disagreement*, never silently overwritten. Your knowledge base admits uncertainty.
 - **The append-only decisions file.** One timestamped line per decision: `2026-06-04 16:45: chose X because Y`. Six months later, "why on earth did we do it this way?" is a grep, not an archaeology dig.
-- **wip-commit safety nets.** Context compaction and session exits trigger deterministic snapshot commits. The next session lists them and asks: distill, keep, or discard. Laziness is a recoverable state.
+- **Private-ref safety nets.** In an adopted repo, context compaction and session exits snapshot your tree to a private git ref — recoverable via the `plainbrain` CLI, but never a commit on your branch, and never anything at all in a repo you haven't adopted. The next session flags it and asks: distill, keep, or discard. Laziness is a recoverable state.
 - **A lazily-loaded self page.** Your standing philosophy, taste, and voice live in one wiki page (`~/wiki/entities/me.md`) behind a one-line global pointer — read when the work is creative or preference-sensitive, never taxing the context of an ordinary debugging session.
 - **Deterministic verification.** `wiki-check.sh` proves the wiki's structural health (dead links, index drift, orphans) with zero AI involvement. Trust, but grep.
 
@@ -139,7 +129,7 @@ knowledge shouldn't be hostage to this year's tool.
 
 **A good fit if you:** live in Claude Code across multiple projects; want to *audit* what your AI remembers; accumulate research/decisions that deserve to outlive chat history; like plain text and git; work across machines (everything syncs as ordinary repos).
 
-**A bad fit if you:** want fully-automatic zero-habit memory (this asks for one habit: "save context"); need true team-concurrent editing of shared knowledge (git merges of prose are mediocre); have a corpus so large it genuinely needs semantic search (see below).
+**A bad fit if you:** want fully-automatic zero-habit memory (this asks for one habit: "distill"); need true team-concurrent editing of shared knowledge (git merges of prose are mediocre); have a corpus so large it genuinely needs semantic search (see below).
 
 ## Expanding it
 

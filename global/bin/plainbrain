@@ -1,0 +1,56 @@
+#!/bin/sh
+# plainbrain — recover the byte-safety snapshots the hooks take.
+# Snapshots live in refs/plainbrain/wip/<session-id> of the current repo. They are
+# stash-format commits: the working tree was never touched when they were made, so
+# they are pure backups. No deps, no network.
+set -u
+
+git rev-parse --show-toplevel >/dev/null 2>&1 || { echo "plainbrain: not in a git repo" >&2; exit 1; }
+cmd="${1:-help}"
+
+case "$cmd" in
+  wip|list)
+    if [ -z "$(git for-each-ref refs/plainbrain/wip 2>/dev/null)" ]; then
+      echo "no plainbrain snapshots in this repo"; exit 0
+    fi
+    git for-each-ref refs/plainbrain/wip \
+      --sort=-committerdate \
+      --format='%(refname)  %(committerdate:relative)  %(contents:subject)'
+    echo
+    echo "inspect: plainbrain show <ref>   restore: plainbrain recover <ref>   drop: plainbrain discard <ref>"
+    ;;
+  show)
+    ref="${2:?usage: plainbrain show <ref>}"
+    git stash show -p "$ref"
+    ;;
+  recover|apply)
+    ref="${2:?usage: plainbrain recover <ref>}"
+    [ -n "$(git status --porcelain 2>/dev/null)" ] && \
+      echo "note: working tree is dirty — the snapshot will be merged onto it." >&2
+    if git stash apply "$ref"; then
+      echo "applied $ref. The ref is left in place; drop it with: plainbrain discard $ref"
+    fi
+    ;;
+  discard)
+    ref="${2:?usage: plainbrain discard <ref>}"
+    git update-ref -d "$ref" && echo "removed $ref"
+    ;;
+  prune)
+    # Keep the N most-recent snapshots, drop older. Manual only — these refs double as a
+    # session trace store, so nothing auto-purges them.
+    keep="${2:-20}"
+    case "$keep" in *[!0-9]*) echo "usage: plainbrain prune [keep=20]" >&2; exit 2 ;; esac
+    refs=$(git for-each-ref refs/plainbrain/wip --sort=-committerdate --format='%(refname)')
+    [ -z "$refs" ] && { echo "no plainbrain snapshots in this repo"; exit 0; }
+    n=0; dropped=0
+    for r in $refs; do
+      n=$((n + 1))
+      [ "$n" -gt "$keep" ] && git update-ref -d "$r" && dropped=$((dropped + 1))
+    done
+    echo "kept $((n - dropped)), dropped $dropped (keep=$keep)"
+    ;;
+  *)
+    echo "plainbrain — recover byte-safety snapshots taken by the session hooks"
+    echo "usage: plainbrain wip | show <ref> | recover <ref> | discard <ref> | prune [keep]"
+    ;;
+esac

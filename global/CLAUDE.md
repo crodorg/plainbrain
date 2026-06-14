@@ -19,20 +19,24 @@ global rules; the project-discipline section is the load-bearing part.
 
 ## Git
 - Commit at logical checkpoints with real messages. Branch for anything risky or exploratory.
-- Hooks auto-snapshot WIP (pre-compact and on exit) — those are safety nets, not curated history.
+- In a repo you've adopted (it carries a `.claude/plainbrain` marker), the hooks snapshot WIP to a
+  private ref (`refs/plainbrain/wip/<session>`, recoverable with the `plainbrain` CLI) — never a
+  branch commit. Un-adopted repos are left untouched. These snapshots are safety nets, not history.
 - Never force-push; never rewrite shared history without asking.
 
 ## Where things live
-- `~/projects/<name>` — each its own repo: CLAUDE.md + decisions.md + the modules that fit
-- `~/wiki` — the knowledge wiki (compiled, interlinked markdown; query it first)
-- `~/wiki/entities/me.md` — the user's standing philosophy, taste, voice. Read it before
+Homes honor `$PLAINBRAIN_*` env vars (set in `~/.config/plainbrain/env`); defaults shown.
+- `$PLAINBRAIN_PROJECTS` (default `~/projects`)`/<name>` — each its own repo: CLAUDE.md + decisions.md + the modules that fit
+- `$PLAINBRAIN_WIKI` (default `~/wiki`) — the knowledge wiki (compiled, interlinked markdown; query it first)
+- `$PLAINBRAIN_WIKI/entities/me.md` — the user's standing philosophy, taste, voice. Read it before
   creative choices, drafting, or preference-sensitive work — don't guess.
-- `~/data` — raw reference material (read-only sources; not a git repo)
-- `~/notes` — the user's own notes (a source the wiki can ingest)
+- `$PLAINBRAIN_DATA` (default `~/data`) — raw reference material (read-only sources; not a git repo)
+- `$PLAINBRAIN_NOTES` (default `~/notes`) — the user's own notes (a source the wiki can ingest)
 
 ## Skills
-- `adopt-project` — bring a new or existing project into this layout (once per project).
-- `save-context` — propose the session's durable items for approval, persist, then commit.
+- `adopt-project` — bring a new or existing project into this layout and activate it (once per project).
+- `distill` — the end-of-session sweep: propose durable wiki/skill/me.md items for approval, then
+  commit (decisions.md + the driver stay current as you work).
 - `wiki-ingest` / `wiki-query` / `wiki-lint` — build and use the knowledge wiki.
 
 ## Grounding
