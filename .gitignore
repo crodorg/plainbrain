@@ -1,2 +1,2 @@
-# Claude Code session markers (hooks write here)
-.claude/state/
+# Local kit state — never ship the activation marker or session state in the distribution repo.
+.claude/
