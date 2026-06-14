@@ -17,7 +17,7 @@ Steps:
 1. **Read `index.md` first** to locate the relevant pages — don't load the whole wiki.
 
 2. **Drill into the relevant pages.** Follow cross-links. Open raw sources under `$PLAINBRAIN_DATA`
-   or `$PLAINBRAIN_NOTES` only when a page's summary isn't enough to answer well.
+   or `$PLAINBRAIN_NOTES` only when a page's summary isn't enough to answer well. When a page answers the question, also check its open-questions/contradictions section and any indexed page taking a contrary position before you settle — confirm against the disagreement, don't stop at the first hit.
 
 3. **Synthesize an answer with citations** — cite the wiki pages you used (and raw source paths
    where a specific fact came from the original). If pages contradict each other, surface the

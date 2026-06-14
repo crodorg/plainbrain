@@ -2,6 +2,7 @@
 
 Append-only. One line per decision or resolved inconsistency, newest at the bottom.
 Format: `YYYY-MM-DD HH:MM: changed/decided X because Y`
+Cite the enacting commit (short-hash) when a decision maps to a specific change.
 
 Git holds *what* changed; this file holds *why* — fast to read without git archaeology.
 

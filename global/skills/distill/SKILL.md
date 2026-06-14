@@ -31,7 +31,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    `git diff`.
    First **reconcile**: a decision made or inconsistency resolved that never reached
    `decisions.md`, or plan movement not yet in the driver — propose it now (grep decisions.md
-   first; already recorded means don't re-propose). Rare if you logged as you worked.
+   first; already recorded means don't re-propose). Rare if you logged as you worked. Also surface **abandoned approaches**: something tried that hit a surprising failure or dead end and was dropped — "tried X, got Y, went with Z" — so the next session doesn't re-derive it; route to decisions.md, or a wiki page if it's a cross-project gotcha.
    Then the **sweep** — the candidates that only surface at session end:
    - **wiki:** did the session produce knowledge that is durable (true in 6+ months),
      cross-project, about the world (not this repo's internals), and cost real effort to
@@ -53,7 +53,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    list, each with its destination:
    - decision / resolved inconsistency → timestamped one-liner appended at the very END of
      `decisions.md` — newest entry is always the last line, never inserted mid-file
-     (`YYYY-MM-DD HH:MM: changed X because Y`). Timestamps come from
+     (`YYYY-MM-DD HH:MM: changed X because Y`); cite the enacting commit short-hash or wip ref when the decision maps to a specific change. Timestamps come from
      `date '+%Y-%m-%d %H:%M'` — always run the command; never stamp from model memory.
    - plan progressed or changed → the relevant **volatile subsection** of `plan.md`;
      stable-section changes flagged loudly and shown in full
@@ -69,7 +69,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    - project CLAUDE.md contradicts reality → flag it in the list; never edit CLAUDE.md here
    **If nothing durable changed, say so and stop.** Do not invent entries to look productive.
 
-4. **Write exactly what was approved** — nothing more. Prefer append-only edits.
+4. **Write exactly what was approved** — nothing more. **Bias to additive:** a new small page or an appended section beats rewriting an existing page's body; a body-rewrite of standing content needs a strong reason and usually loses to a new page (the diff stays legible, nothing is silently overwritten). decisions.md is append-only; plan.md's *volatile* subsections are the deliberate exception.
 
 5. **Commit** with a clear message summarizing the session's real work. A clean distill MUST
    leave NO project repo dirty — otherwise the exit hook snapshots the leftover and re-raises
@@ -82,4 +82,4 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    rm -f .claude/state/.pending-distill
    ```
 
-Preserve the *why*, not just the *what* — git already has the what.
+Preserve the *why*, not just the *what* — git already has the what. When a record has a fuller trace — the enacting commit, the wip ref, the session transcript — *point* at it; never paste a trace into the file or the context: a pointer keeps the log lean and the raw record one hop away.
