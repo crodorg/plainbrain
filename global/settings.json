@@ -1,5 +1,21 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/wiki-surface.sh", "timeout": 10 }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/wiki-surface.sh", "timeout": 10 }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "",

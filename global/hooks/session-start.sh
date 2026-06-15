@@ -23,6 +23,13 @@ elif [ -f CONTEXT.md ]; then
   echo "### Driver: read ./CONTEXT.md — it is the driver for this project."
 fi
 
+WIKI="${PLAINBRAIN_WIKI:-$HOME/wiki}"
+if [ -d "$WIKI" ]; then
+  echo
+  echo "### Wiki"
+  echo "$(find "$WIKI" -name '*.md' ! -path '*/_lint/*' | wc -l | tr -d ' ') pages — relevant ones auto-surface by tag on Bash calls; /wiki-query to search"
+fi
+
 if [ -f .claude/state/.pending-distill ]; then
   echo
   echo "### Pending reconcile"
