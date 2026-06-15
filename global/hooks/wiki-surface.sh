@@ -64,7 +64,7 @@ def main():
         "find", "echo", "bash", "shell", "file", "files", "page",
         # broad / low-signal tags (examples — tune to your wiki's tag vocabulary)
         "agent", "agents", "tool", "tools", "tooling", "security", "library",
-        "coding", "automation", "quality",
+        "coding", "automation", "quality", "comparison",
     }
 
     # Pass 1: read front-matter tags + type from every page; doc-frequency per tag.
