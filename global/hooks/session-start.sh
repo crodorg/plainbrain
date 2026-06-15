@@ -23,6 +23,24 @@ elif [ -f CONTEXT.md ]; then
   echo "### Driver: read ./CONTEXT.md — it is the driver for this project."
 fi
 
+# --- driver staleness ---------------------------------------------------------
+# Soft nudge when the driver hasn't moved while work kept going (intent may have
+# drifted from the code). Not a gate. Tune/disable via PLAINBRAIN_DRIVER_STALE_COMMITS.
+driver=""
+[ -f plan.md ] && driver="plan.md"
+[ -z "$driver" ] && [ -f CONTEXT.md ] && driver="CONTEXT.md"
+if [ -n "$driver" ]; then
+  dts=$(git log -1 --format=%cI -- "$driver" 2>/dev/null)
+  if [ -n "$dts" ]; then
+    n=$(git rev-list --count --since="$dts" HEAD 2>/dev/null || echo 0)
+    if [ "${n:-0}" -ge "${PLAINBRAIN_DRIVER_STALE_COMMITS:-20}" ]; then
+      echo
+      echo "### Driver staleness"
+      echo "$driver hasn't moved in ~$n commits — re-check it still matches the code, then update it or distill to reconcile."
+    fi
+  fi
+fi
+
 WIKI="${PLAINBRAIN_WIKI:-$HOME/wiki}"
 if [ -d "$WIKI" ]; then
   echo
