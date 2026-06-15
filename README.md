@@ -1,6 +1,6 @@
 # plainbrain
 
-**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and three small shell scripts. Wired for [Claude Code](https://claude.com/claude-code) out of the box, portable to any agent that can read instructions and run shell. No database, no daemons, no vector store, no subscriptions — and your AI stops forgetting what matters.
+**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and three small shell scripts. Wired for [Claude Code](https://claude.com/claude-code) out of the box, portable to any agent that can read instructions and run shell. No database, no daemons, no vector store, no subscriptions.
 
 ## The problem
 
@@ -96,16 +96,16 @@ Verify: in a repo, run "adopt this project" to activate it, then open Claude Cod
 
 And what you *don't* do: you never organize the wiki by hand (ingest does the filing, lint does the auditing), and you never lose work to a crashed or forgotten session (private-ref snapshots + next-session triage).
 
-## What's actually different here
+## Why it's built this way
 
-Compared to the obvious alternatives:
+- **Memory routed by kind.** Project state, world knowledge, and personal notes live in separate homes with separate lifecycles, not one opaque bucket. Nothing is written behind your back; `git log` is the audit trail.
+- **Retrieval by reading, not similarity.** An index file plus links the model follows, the way a person uses a wiki. Cost scales with the index and the pages actually read, not with the size of the corpus. No embeddings to drift, no re-indexing, no similarity scores to tune, and every citation is a file path you can open.
+- **Co-maintained, not hand-maintained.** The AI does the tedious part — filing, cross-linking, index updates, contradiction flags — and you do the judgment part: what matters and what's true. The upkeep that kills most second brains is exactly the part that's delegated.
+- **No runtime to rot.** No server, no schema, no daemon. The "framework" is conventions written in markdown. It works offline, survives tool churn, and every piece is replaceable with `sed`.
 
-- **vs. built-in auto-memory** — Everything is explicit, inspectable, and versioned. Memory is *routed by kind* — project state, world knowledge, personal notes go to different homes with different lifecycles — instead of one opaque bucket. Nothing is written behind your back; `git log` is the audit trail.
-- **vs. vector databases / RAG** — Retrieval is an index file plus links the model follows, like a human using a wiki. Cost scales with the index and the pages actually read — not with corpus size. No embeddings to drift, no re-indexing, no similarity scores to tune, and citations are file paths you can open. Independent echo: a 2026 Stanford/MIT study (*[Meta-Harness](https://arxiv.org/abs/2603.28052)*) found a model reading full, uncompressed files via `grep`/`cat` beat compressed-summary memory while using roughly 4× fewer context tokens — supporting evidence, from a different and far more specialized setup, that the lever is reading the actual record rather than tuning a retriever.
-- **vs. Obsidian/Notion second brains** — Those are for humans to maintain; this is **co-maintained**: the AI does the tedious part (filing, cross-linking, index updates, contradiction flagging) and you do the judgment part (what matters, what's true). The maintenance burden that kills most second brains is precisely the part that's delegated.
-- **vs. agent-memory frameworks (MemGPT-style)** — No server, no runtime, no schema. The "framework" is conventions written in markdown. It works offline, survives tool churn, and every component is replaceable with `sed`.
+## Ideas worth stealing
 
-Smaller novelties worth stealing even if you don't adopt the whole system:
+Even if you don't adopt the whole thing, a few pieces stand on their own:
 
 - **The contradiction ledger.** Wiki pages have a dated "Open questions / contradictions" section. New facts that conflict with old ones get *recorded as disagreement*, never silently overwritten. Your knowledge base admits uncertainty.
 - **The append-only decisions file.** One timestamped line per decision: `2026-06-04 16:45: chose X because Y`. Six months later, "why on earth did we do it this way?" is a grep, not an archaeology dig.
