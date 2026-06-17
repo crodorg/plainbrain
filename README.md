@@ -103,13 +103,14 @@ And what you *don't* do: you never organize the wiki by hand (ingest does the fi
 - **Co-maintained, not hand-maintained.** The AI does the tedious part — filing, cross-linking, index updates, contradiction flags — and you do the judgment part: what matters and what's true. The upkeep that kills most second brains is exactly the part that's delegated.
 - **No runtime to rot.** No server, no schema, no daemon. The "framework" is conventions written in markdown. It works offline, survives tool churn, and every piece is replaceable with `sed`.
 
-## Ideas worth stealing
+## Ideas to consider
 
 Even if you don't adopt the whole thing, a few pieces stand on their own:
 
 - **The contradiction ledger.** Wiki pages have a dated "Open questions / contradictions" section. New facts that conflict with old ones get *recorded as disagreement*, never silently overwritten. Your knowledge base admits uncertainty.
 - **The append-only decisions file.** One timestamped line per decision: `2026-06-04 16:45: chose X because Y`. Six months later, "why on earth did we do it this way?" is a grep, not an archaeology dig.
 - **Private-ref safety nets.** In an adopted repo, context compaction and session exits snapshot your tree to a private git ref — recoverable via the `plainbrain` CLI, but never a commit on your branch, and never anything at all in a repo you haven't adopted. The next session flags it and asks: distill, keep, or discard. Laziness is a recoverable state.
+- **A warm-resume pointer.** At the end of a task the agent writes the next few steps — and any open questions — to a small throwaway file. After you clear the context, you read that file *outside* the model (a terminal popup, a status line, plain `cat`) and paste back only the one phrase that restarts the work. The next move survives a context reset without spending a single token to re-derive it, and the display is whatever your terminal already does.
 - **A lazily-loaded self page.** Your standing philosophy, taste, and voice live in one wiki page (`~/wiki/entities/me.md`) behind a one-line global pointer — read when the work is creative or preference-sensitive, never taxing the context of an ordinary debugging session.
 - **Deterministic verification.** `wiki-check.sh` proves the wiki's structural health (dead links, index drift, orphans) with zero AI involvement. Trust, but grep.
 
