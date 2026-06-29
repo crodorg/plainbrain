@@ -1,19 +1,38 @@
 #!/bin/sh
-# Wiki auto-surface — runs on BOTH PreToolUse:Bash and UserPromptSubmit.
+# Wiki auto-surface — fires on UserPromptSubmit (and optionally PreToolUse:Bash; see
+# settings.json). Adoption-gated like the other hooks: does nothing unless this repo carries
+# a .claude/plainbrain marker, so un-adopted repos and non-repo sessions get nothing.
 # Non-blocking (always exits 0), silent on no match, once-per-tag-per-session.
-# Matches a page's `tags:` against the words in the Bash command (or the user's
-# prompt) + cwd; on a hit, injects the page's H1 + first paragraph so autonomous
-# shell work and topic-shaped prompts both surface the relevant page.
-# A matched tag fires only once per session (a broad project tag won't dribble its
-# pages out call after call). Tuning knob: STOP (stoplist) + MIN_LEN below.
+# Matches a page's `tags:` (bracket OR YAML block form) against the words in the user's prompt
+# (or the Bash command) + cwd; on a hit, injects the page's H1 + first paragraph.
+# A matched tag fires only once per session (a broad project tag won't dribble its pages out
+# call after call). Tuning knob: STOP (stoplist) + MIN_LEN below. Needs python3 — prints a
+# one-time note and stays off if it's missing.
 
 PAYLOAD=$(cat 2>/dev/null)
 [ -z "$PAYLOAD" ] && exit 0
+
+# Adoption gate — like the other hooks, stay out of un-adopted repos and non-repo sessions,
+# so the "un-adopted repos get nothing, no surprises" promise holds for every hook.
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -f "$root/.claude/plainbrain" ] || exit 0
 
 WIKI="${PLAINBRAIN_WIKI:-$HOME/wiki}"
 STATE_DIR="$HOME/.claude/state"
 [ -d "$WIKI" ] || exit 0
 mkdir -p "$STATE_DIR" 2>/dev/null || exit 0
+
+# This hook uses python3 for robust JSON parsing (parsing arbitrary shell commands out of the
+# payload in pure sh would be worse). If python3 is absent, surface a one-time note instead of
+# dying silently, then stay off — nothing else in plainbrain needs python3.
+if ! command -v python3 >/dev/null 2>&1; then
+  notice="$STATE_DIR/.wiki-surface-nopython"
+  if [ ! -f "$notice" ]; then
+    : > "$notice" 2>/dev/null
+    echo "ℹ️ plainbrain: wiki auto-surfacing needs python3, which isn't on PATH — that hook is off (everything else works). Install python3, or remove the wiki-surface hook from settings.json to silence this. (shown once)"
+  fi
+  exit 0
+fi
 
 export PAYLOAD WIKI STATE_DIR
 
@@ -23,6 +42,24 @@ import os, re, json
 # Page type -> surfacing priority (lower = surfaced first). A gotcha/concept beats a
 # project overview, which beats a raw source archive.
 TYPE_RANK = {"concept": 0, "comparison": 0, "entity": 1, "source": 2, "overview": 3}
+
+def parse_tags(chunk):
+    """Front-matter tags, tolerating both `tags: [a, b]` and the YAML block form
+    (`tags:` then `  - a` lines). A page authored either way must be surfaceable."""
+    m = re.search(r"(?m)^tags:\s*\[(.*?)\]", chunk)
+    if m:
+        raw = m.group(1).split(",")
+    else:
+        m2 = re.search(r"(?m)^tags:[ \t]*\r?\n", chunk)   # end() lands after the newline
+        if not m2:
+            return []
+        raw = []
+        for line in chunk[m2.end():].splitlines():
+            mm = re.match(r"\s*-\s+(.+)", line)
+            if not mm:              # first non-list line (next key or blank) ends the block
+                break
+            raw.append(mm.group(1))
+    return [t.strip().strip("\"'").lower() for t in raw]
 
 def main():
     wiki = os.environ["WIKI"]
@@ -82,11 +119,7 @@ def main():
                     chunk = f.read(1500)
             except OSError:
                 continue
-            m = re.search(r"(?m)^tags:\s*\[(.*?)\]", chunk)
-            if not m:
-                continue
-            tags = [t.strip().strip("\"'").lower() for t in m.group(1).split(",")]
-            tags = [t for t in tags if len(t) >= MIN_LEN and t not in STOP]
+            tags = [t for t in parse_tags(chunk) if len(t) >= MIN_LEN and t not in STOP]
             if not tags:
                 continue
             tm = re.search(r"(?m)^type:\s*(\S+)", chunk)

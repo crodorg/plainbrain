@@ -1,6 +1,6 @@
 # plainbrain
 
-**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and three small shell scripts. Wired for [Claude Code](https://claude.com/claude-code) out of the box, portable to any agent that can read instructions and run shell. No database, no daemons, no vector store, no subscriptions.
+**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and a handful of small shell scripts. Wired for [Claude Code](https://claude.com/claude-code) out of the box, portable to any agent that can read instructions and run shell. No database, no daemons, no vector store, no subscriptions.
 
 ## The problem
 
@@ -41,7 +41,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 | Path | What it is |
 |---|---|
-| `global/hooks/` | 3 hooks, **inert until a repo is adopted**: session-start (inject git state + driver pointer + pending-work flag), pre-compact + session-end (snapshot the tree to a private ref) |
+| `global/hooks/` | 4 hooks, **inert until a repo is adopted**: session-start (inject git state + driver pointer + pending-work flag), pre-compact + session-end (snapshot the tree to a private ref), wiki-surface (on your prompt, inject any wiki page whose tags match the topic — uses python3) |
 | `global/skills/adopt-project/` | Bring any project — new or existing — into the layout: the interview picks the modules that fit; files drafted and approved before written |
 | `global/skills/distill/` | The end-of-session sweep: proposes 0–3 durable wiki/skill/me.md items for your approval, routes them to their homes, commits — you are the noise gate |
 | `global/skills/wiki-ingest/` | Source → wiki: summary page, entity/concept updates, cross-links, contradiction flags, index + log |
@@ -56,7 +56,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 ## Install
 
-Requirements: Claude Code, git, bash. That's the whole stack.
+Requirements: Claude Code, git, bash — that's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
 
 ```sh
 git clone https://github.com/crodorg/plainbrain
@@ -99,7 +99,7 @@ And what you *don't* do: you never organize the wiki by hand (ingest does the fi
 ## Why it's built this way
 
 - **Memory routed by kind.** Project state, world knowledge, and personal notes live in separate homes with separate lifecycles, not one opaque bucket. Nothing is written behind your back; `git log` is the audit trail.
-- **Retrieval by reading, not similarity.** An index file plus links the model follows, the way a person uses a wiki. Cost scales with the index and the pages actually read, not with the size of the corpus. No embeddings to drift, no re-indexing, no similarity scores to tune, and every citation is a file path you can open.
+- **Retrieval by reading, not similarity.** An index file plus links the model follows, the way a person uses a wiki. Cost scales with the index and the pages actually read, not with the size of the corpus. No embeddings to drift, no re-indexing, no embedding scores to tune, and every citation is a file path you can open. (The one proactive-surfacing hook ranks tag matches with a plain, hand-editable stoplist — a dumb knob in a file, not an opaque vector score.)
 - **Co-maintained, not hand-maintained.** The AI does the tedious part — filing, cross-linking, index updates, contradiction flags — and you do the judgment part: what matters and what's true. The upkeep that kills most second brains is exactly the part that's delegated.
 - **No runtime to rot.** No server, no schema, no daemon. The "framework" is conventions written in markdown. It works offline, survives tool churn, and every piece is replaceable with `sed`.
 
@@ -118,10 +118,10 @@ Even if you don't adopt the whole thing, a few pieces stand on their own:
 
 plainbrain ships wired for Claude Code because that's where it was born, but nothing about
 the *system* is Claude-specific. The memories are markdown. The hooks are plain shell scripts
-fired on ordinary lifecycle events (session start, context compaction, session end). The
-skills are natural-language instruction files — any capable model can follow them.
+fired on ordinary lifecycle events (session start, context compaction, session end, prompt
+submit). The skills are natural-language instruction files — any capable model can follow them.
 
-To port it: re-wire the three hooks to your agent's equivalent events, and expose the skill
+To port it: re-wire the four hooks to your agent's equivalent events, and expose the skill
 files as instructions your agent loads on demand. The files themselves — `plan.md`,
 `decisions.md`, the wiki — don't care what reads them. That's the point: your accumulated
 knowledge shouldn't be hostage to this year's tool.
