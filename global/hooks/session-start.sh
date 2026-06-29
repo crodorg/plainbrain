@@ -51,6 +51,18 @@ if [ -n "$driver" ]; then
   fi
 fi
 
+# --- decisions.md scale advisory ----------------------------------------------
+# Mirror the wiki's scale advisories: a very long decisions.md slows the "why" grep and
+# usually wants annual roll-off. Informational, never a gate. Tune via PLAINBRAIN_DECISIONS_MAX_LINES.
+if [ -f decisions.md ]; then
+  dl=$(wc -l < decisions.md 2>/dev/null | tr -d ' ')
+  if [ "${dl:-0}" -ge "${PLAINBRAIN_DECISIONS_MAX_LINES:-500}" ]; then
+    echo
+    echo "### decisions.md scale"
+    echo "decisions.md is $dl lines (>=${PLAINBRAIN_DECISIONS_MAX_LINES:-500}) — consider rolling older entries into decisions-<year>.md with a one-line pointer at the top of the live file."
+  fi
+fi
+
 WIKI="${PLAINBRAIN_WIKI:-$HOME/wiki}"
 if [ -d "$WIKI" ]; then
   echo

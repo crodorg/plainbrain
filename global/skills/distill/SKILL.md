@@ -56,7 +56,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    list, each with its destination:
    - decision / resolved inconsistency → timestamped one-liner appended at the very END of
      `decisions.md` — newest entry is always the last line, never inserted mid-file
-     (`YYYY-MM-DD HH:MM: changed X because Y`); cite the enacting commit short-hash or wip ref when the decision maps to a specific change. Timestamps come from
+     (`YYYY-MM-DD HH:MM: changed X because Y`); cite the enacting commit short-hash or wip ref when the decision maps to a specific change. If it reverses a prior decision, end the line with `— supersedes <YYYY-MM-DD HH:MM>` naming the overridden entry (which stays; never edit or delete it). Timestamps come from
      `date '+%Y-%m-%d %H:%M'` — always run the command; never stamp from model memory.
    - plan progressed or changed → the relevant **volatile subsection** of `plan.md`;
      stable-section changes flagged loudly and shown in full
