@@ -33,7 +33,7 @@ out=$(
 
   # 3. Missing or invalid frontmatter type.
   for p in $pages; do
-    head -10 "$p" | grep -q '^type: *\(entity\|concept\|comparison\|source\)' \
+    head -20 "$p" | grep -q '^type: *\(entity\|concept\|comparison\|source\)' \
       || echo "missing/invalid frontmatter type: $p"
   done
 
@@ -66,6 +66,11 @@ out=$(
       inmap && /^- / && $0 !~ /^- Per / && $0 !~ /comparisons\// {
         print "unattributed map line: " f " :: " $0 }
     ' "$p"
+  done
+
+  # 7. Pages with no `tags:` line — invisible to the wiki-surface hook (can never auto-surface).
+  for p in $pages; do
+    head -20 "$p" | grep -q '^tags:' || echo "no tags (won't auto-surface): $p"
   done
 )
 
