@@ -19,6 +19,8 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    me.md sweep, step 2) — if there is none, report "nothing to distill" citing the commits
    from the check output, write the marker (step 6), and STOP. Read nothing else.
    On `UNSAVED` or `COMMITS-NO-DURABLES`, continue with the full skill.
+   Either way, if `.claude/state/decisions.scratch` exists, read it — parked *why* lines not
+   yet in `decisions.md` are themselves something to distill (reconcile them in step 2).
 
 1. **Locate the project.** `git rev-parse --show-toplevel`. Read the project's CLAUDE.md
    pointer block: it declares which durable files this project carries (core: decisions.md;
@@ -27,8 +29,9 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    in a project that doesn't plan). If a missing module seems genuinely needed, suggest
    re-running adopt-project instead.
 
-2. **Extract candidates — reconcile, then sweep.** Review the conversation plus `git status` /
-   `git diff`.
+2. **Extract candidates — reconcile, then sweep.** Review the conversation,
+   `.claude/state/decisions.scratch` (parked rationale that a compaction may have dropped from
+   the conversation — treat each line as a reconcile candidate), plus `git status` / `git diff`.
    First **reconcile**: a decision made or inconsistency resolved that never reached
    `decisions.md`, or plan movement not yet in the driver — propose it now (grep decisions.md
    first; already recorded means don't re-propose). Rare if you logged as you worked. Also surface **abandoned approaches**: something tried that hit a surprising failure or dead end and was dropped — "tried X, got Y, went with Z" — so the next session doesn't re-derive it; route to decisions.md, or a wiki page if it's a cross-project gotcha.
@@ -75,11 +78,12 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    leave NO project repo dirty — otherwise the exit hook snapshots the leftover and re-raises
    `.pending-distill`, contradicting the sweep you just made.
 
-6. **Write the marker:**
+6. **Write the marker** (and clear the rationale scratch — its lines are now reconciled into
+   `decisions.md`, or were reviewed and dropped):
    ```
    mkdir -p .claude/state
    date +%s > .claude/state/.last-distill
-   rm -f .claude/state/.pending-distill
+   rm -f .claude/state/.pending-distill .claude/state/decisions.scratch
    ```
 
 Preserve the *why*, not just the *what* — git already has the what. When a record has a fuller trace — the enacting commit, the wip ref, the session transcript — *point* at it; never paste a trace into the file or the context: a pointer keeps the log lean and the raw record one hop away.

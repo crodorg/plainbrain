@@ -105,7 +105,7 @@ are a first-class source, same as `~/data`.
 | When | What |
 |---|---|
 | End of every work session | "distill" (or trust the snapshot safety net) |
-| Before a manual `/compact` in a decision-heavy session | make sure open decisions are in `decisions.md` first — the snapshot saves files, not the conversation |
+| Before a manual `/compact` in a decision-heavy session | the agent parks each decision's *why* in `.claude/state/decisions.scratch` as it works, so rationale survives — a glance to confirm the open ones are captured (scratch or `decisions.md`) is still cheap |
 | Material arrives | drop in `~/data/<project>/`; ingest when it earns it |
 | Weekly-ish | commit your notes (`notes-save`) |
 | Monthly-ish, or after hand-editing the wiki | "lint the wiki", then `wiki-save` |
@@ -116,7 +116,7 @@ are a first-class source, same as `~/data`.
 | Went wrong | The system already did | You do |
 |---|---|---|
 | Exited without distilling | private-ref snapshot + flag | next session asks; distill or `plainbrain wip` |
-| Compaction mid-task | pre-compact private-ref snapshot | nothing — keep working |
+| Compaction mid-task | pre-compact snapshot (files) + `decisions.scratch` (the why) | nothing — keep working |
 | Hand-edited wiki, links stale | nothing (your edits are yours) | "lint the wiki" reconciles |
 | "When did we decide X?" | decisions.md is append-only + timestamped | grep it |
 | Wiki page contradicts a new source | ingest flagged + dated it | resolve when you know |

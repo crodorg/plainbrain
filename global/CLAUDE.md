@@ -14,6 +14,10 @@ global rules; the project-discipline section is the load-bearing part.
   `decisions.md` (`YYYY-MM-DD HH:MM: changed X because Y`, appended at the very end; stamp
   via `date '+%Y-%m-%d %H:%M'`, never from memory) and adjust the relevant subsection
   deliberately.
+- Park a decision's *why* in `.claude/state/decisions.scratch` (ephemeral, gitignored) the
+  moment you make it — one line each, no approval needed. It survives a context compaction
+  that would otherwise drop the reasoning; distill reconciles the scratch into `decisions.md`
+  on approval, then clears it.
 - decisions.md is the audit trail, not the state — current state lives in the driver; the log
   holds the why. Code is the source of truth; the driver states intent; git is the proof.
 
