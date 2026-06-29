@@ -13,7 +13,7 @@ mkdir -p .claude/state .claude/state/sessions
 # session's start marker are keyed by session_id, so two Claude sessions in one repo can't
 # clobber each other (see pre-compact.sh / session-end.sh). Falls back to the shared
 # timestamp file if the payload carries no session_id — never worse than the old behavior.
-payload=$(cat 2>/dev/null)
+payload=""; [ -t 0 ] || payload=$(cat 2>/dev/null)   # read the hook payload; never block on a tty
 sid=$(printf '%s' "$payload" | tr '\n' ' ' \
   | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | tr -cd 'A-Za-z0-9_.-')
 now=$(date +%s)

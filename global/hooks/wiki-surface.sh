@@ -9,7 +9,7 @@
 # call after call). Tuning knob: STOP (stoplist) + MIN_LEN below. Needs python3 — prints a
 # one-time note and stays off if it's missing.
 
-PAYLOAD=$(cat 2>/dev/null)
+PAYLOAD=""; [ -t 0 ] || PAYLOAD=$(cat 2>/dev/null)   # read the hook payload; never block on a tty
 [ -z "$PAYLOAD" ] && exit 0
 
 # Adoption gate — like the other hooks, stay out of un-adopted repos and non-repo sessions,

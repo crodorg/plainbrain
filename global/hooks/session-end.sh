@@ -13,7 +13,7 @@ mkdir -p .claude/state
 # session_id from the hook payload (stdin JSON): keys this session's start marker and its wip
 # ref, so concurrent sessions in one repo can't clobber each other. Falls back to the shared
 # timestamp file when there's no id.
-payload=$(cat 2>/dev/null)
+payload=""; [ -t 0 ] || payload=$(cat 2>/dev/null)   # read the hook payload; never block on a tty
 sid=$(printf '%s' "$payload" | tr '\n' ' ' \
   | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | tr -cd 'A-Za-z0-9_.-')
 

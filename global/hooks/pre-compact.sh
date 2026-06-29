@@ -13,7 +13,7 @@ cd "$root" || exit 0
 # Key the snapshot ref by the session_id from the hook payload (stdin JSON), so concurrent
 # sessions in one repo get distinct refs instead of silently overwriting each other. Fall
 # back to the shared session-start timestamp (stable within a session) when there's no id.
-payload=$(cat 2>/dev/null)
+payload=""; [ -t 0 ] || payload=$(cat 2>/dev/null)   # read the hook payload; never block on a tty
 sid=$(printf '%s' "$payload" | tr '\n' ' ' \
   | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | tr -cd 'A-Za-z0-9_.-')
 [ -z "$sid" ] && [ -f .claude/state/.session-start ] && sid="ts$(tr -cd '0-9' < .claude/state/.session-start)"
