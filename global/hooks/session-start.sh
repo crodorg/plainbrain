@@ -7,8 +7,18 @@ set -u
 root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0   # not a git repo: nothing to do
 cd "$root" || exit 0
 [ -f .claude/plainbrain ] || exit 0                            # not activated: stay out of the way
-mkdir -p .claude/state
-date +%s > .claude/state/.session-start
+mkdir -p .claude/state .claude/state/sessions
+
+# Session identity from the hook payload (stdin JSON). The wip-snapshot refs and this
+# session's start marker are keyed by session_id, so two Claude sessions in one repo can't
+# clobber each other (see pre-compact.sh / session-end.sh). Falls back to the shared
+# timestamp file if the payload carries no session_id — never worse than the old behavior.
+payload=$(cat 2>/dev/null)
+sid=$(printf '%s' "$payload" | tr '\n' ' ' \
+  | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | tr -cd 'A-Za-z0-9_.-')
+now=$(date +%s)
+printf '%s\n' "$now" > .claude/state/.session-start                 # current-session pointer (payload-less check.sh)
+[ -n "$sid" ] && printf '%s\n' "$now" > ".claude/state/sessions/$sid.start"
 
 echo "## Session context: $(basename "$root")"
 echo
