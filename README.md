@@ -51,7 +51,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 | `global/CLAUDE.md` | Lean global rules: plan discipline, git discipline, where things live |
 | `global/settings.json` | The hook wiring (merged into yours — never overwritten) |
 | `install.sh` / `update.sh` | Idempotent, backup-first installer + kit-file updater |
-| `wiki/` | Wiki scaffold: schema doc, index, log, overview |
+| `wiki/` | Wiki scaffold: schema doc, index, overview, people roster |
 | `project-template/` | Core templates (CLAUDE.md, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
 
 ## Install

@@ -64,7 +64,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    - new architectural fact → `ARCHITECTURE.md`
    - fact about the user as a person, useful beyond this project → `$PLAINBRAIN_WIKI/entities/me.md`
    - cross-project world-fact passing the wiki litmus → a page in `$PLAINBRAIN_WIKI`, filed
-     directly (update index.md; log.md entry noting "filed from session"); full
+     directly (update index.md; commit noting "filed from session"); full
      wiki-ingest only when a real source file exists in `$PLAINBRAIN_DATA` or `$PLAINBRAIN_NOTES`
    - repeatable procedure (capture) or skill misfire (repair) → a SKILL.md draft or
      minimal fix, shown in full before writing

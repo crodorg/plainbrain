@@ -35,7 +35,7 @@ Steps:
    answers shouldn't vanish into chat history.
 
 5. If the user accepts: write the page, add cross-links to and from related pages, update
-   `index.md`, append a `log.md` entry (`## [YYYY-MM-DD] query | <topic>`), and commit.
+   `index.md`, and commit with a descriptive message (the commit is the activity record).
 
 Answers can take whatever form fits — prose, a table, a list. The filing-back step is what
 turns querying into accumulation.

@@ -10,7 +10,6 @@ you curate sources, ask questions, and may hand-edit any page. It is plain markd
 ~/wiki/
   overview.md      # top-level synthesis / entry point
   index.md         # catalog of every page (link + one-line summary), read FIRST on query
-  log.md           # append-only, chronological, greppable record of ingests/queries/lints
   entities/        # one page per concrete thing: a company, person, product, place
   entities/people.md  # the trust roster: authors/figures + weight tier (see Attribution)
   concepts/        # one page per idea, method, framework, mechanism
@@ -31,7 +30,7 @@ File a fact only if ALL four hold:
 Fails the test → route down: project-only knowledge → that project's CONTEXT.md /
 ARCHITECTURE.md; about the user as a person → `entities/me.md`; ephemeral → nowhere.
 Knowledge born in conversation (no source file) is filed directly as a page — update
-`index.md`, note "filed from session" in `log.md`; `wiki-ingest` is for real source files.
+`index.md` and commit noting "filed from session"; `wiki-ingest` is for real source files.
 
 ## Sources live elsewhere
 
@@ -55,7 +54,6 @@ Minimal YAML frontmatter, then prose with relative-link cross-references. Keep f
 title: Acme Bank
 type: entity            # entity | concept | comparison | source
 created: 2026-06-02
-updated: 2026-06-02
 sources: [sources/acme-q1-2026.md]
 tags: [banking, research, competitor]
 ---
@@ -103,8 +101,8 @@ Knowledge here is **attributed and weighted**, never flattened into one anonymou
 - **Ingest** (`wiki-ingest`): read a source from `~/data` or `~/notes`; search the existing
   wiki to decide edit-vs-create; write a `sources/` summary citing the raw path; update or
   create the relevant `entities/` and `concepts/` pages with cross-links; flag any contradiction
-  with existing claims; update `index.md`; append a `log.md` entry; commit. One source may touch
-  10–15 pages — that's expected.
+  with existing claims; update `index.md`; commit. One source may touch 10–15 pages — that's
+  expected.
 - **Query** (`wiki-query`): read `index.md` first, drill into the relevant pages (raw sources
   only if needed), answer with citations. If the answer is a durable insight (a comparison, a
   synthesis, a discovered connection), **file it back as a new page** so explorations compound.
@@ -116,7 +114,8 @@ Knowledge here is **attributed and weighted**, never flattened into one anonymou
 - Editing in place is fine, but prefer to append to "Open questions / contradictions" rather
   than silently overwriting a claim — note *why* it changed.
 - After any hand-edit, run `wiki-lint` to reconcile the index and cross-references.
-- `index.md` and `log.md` are updated on every ingest. Keep `index.md` terse (a map, not a copy).
+- `index.md` is updated on every ingest; keep it terse (a map, not a copy). The commit history
+  is the activity record — no separate log file.
 - Size thresholds: split `index.md` per-category past ~300 entries; split any page past ~150
   lines. Query cost scales with the index + pages actually read, never with total wiki size.
 - `wiki-lint` opens with a deterministic structural pass (`wiki-check.sh`, in the wiki-lint

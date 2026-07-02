@@ -36,10 +36,8 @@ Steps:
 
 6. **Update `index.md`**: add or refresh the one-line entry for every page you created or changed.
 
-7. **Append to `log.md`**: `## [YYYY-MM-DD] ingest | <source title>` plus a one-line note of
-   what it touched.
-
-8. **Commit** with a message naming the source.
+7. **Commit** with a message naming the source and noting what it touched — the commit history
+   is the activity record (no separate ledger file).
 
 Keep pages small and single-topic. Link by relative markdown path. **Reuse an existing tag
 before coining a new one** — grep the current vocabulary (`grep -rho 'tags:.*' entities concepts

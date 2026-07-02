@@ -17,8 +17,8 @@ Scan for:
 
 1. **Contradictions** — pages that assert conflicting things. Check the "Open questions /
    contradictions" sections and the claims across related pages.
-2. **Stale claims** — statements superseded by a newer source. Use `log.md` dates and source
-   dates to spot what's outdated.
+2. **Stale claims** — statements superseded by a newer source. Use git dates
+   (`git log -1 --format=%cI -- <page>`) and source file dates to spot what's outdated.
 3. **Orphan pages** — pages with no inbound links. Either link them in or question whether they
    should exist.
 4. **Missing pages** — entities or concepts referenced repeatedly but lacking their own page.
@@ -31,7 +31,7 @@ Output:
 - Propose concrete fixes. Apply the ones the user approves (or, in headless/cron mode, apply
   safe structural fixes — adding cross-links, fixing the index — and only *flag* substantive
   ones like contradictions for human review).
-- Append a `log.md` entry (`## [YYYY-MM-DD] lint | N findings`) and commit.
+- Commit with a message summarizing the findings (the commit is the record).
 
 For a large wiki, lint in **batches** (e.g. a category at a time) to stay within context, and
 keep a running scratchpad of findings across batches.

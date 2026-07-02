@@ -77,7 +77,7 @@ $ cp ~/Downloads/acme-q1-2026.pdf ~/data/acme/
 What happens, in order: Claude reads it, **discusses takeaways with you first**, greps the
 wiki to edit-rather-than-duplicate, then writes a `sources/` summary (citing the raw path),
 updates entity/concept pages with cross-links both directions, flags dated contradictions
-with existing claims, updates `index.md` + `log.md`, commits. One source touching 10–15
+with existing claims, updates `index.md`, commits. One source touching 10–15
 pages is normal. Raw files in `~/data` are never modified.
 
 ## Loop 3 — asking the wiki

@@ -12,7 +12,7 @@ pages=$(find entities concepts comparisons sources -name '*.md' 2>/dev/null | so
 
 out=$(
   # 1. Dead relative links — every (...*.md) target must resolve from the page's dir.
-  for p in $pages index.md overview.md log.md; do
+  for p in $pages index.md overview.md; do
     [ -f "$p" ] || continue
     dir=$(dirname "$p")
     sed 's/<!--.*-->//g' "$p" 2>/dev/null \
