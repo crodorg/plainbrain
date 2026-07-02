@@ -96,6 +96,41 @@ Verify: in a repo, run "adopt this project" to activate it, then open Claude Cod
 
 And what you *don't* do: you never organize the wiki by hand (ingest does the filing, lint does the auditing), and you never lose work to a crashed or forgotten session (private-ref snapshots + next-session triage).
 
+## Where each thing goes
+
+Everything durable that crosses your desk fits one of four homes:
+
+| You have... | It goes to... | How it gets there |
+|---|---|---|
+| Decided to use LISTEN/NOTIFY instead of Redis | `<project>/decisions.md` | "distill" at session end |
+| A competitor's Q1 earnings PDF | `~/data/<project>/`, then the wiki | `cp` it there; "ingest ~/data/acme/q1.pdf" |
+| Learned a durable fact about a company/tool | `~/wiki/entities/` | falls out of an ingest, or "file this into the wiki" |
+| A shower thought | `~/notes` | however you capture notes |
+| "Which vendors did we rule out, and why?" | answered FROM the wiki | "query the wiki: …" |
+| An outside model's take that changed your mind | `decisions.md` | distill keeps opinions that mattered |
+| How the deploy pipeline works | `<project>/ARCHITECTURE.md` | distill routes structural facts |
+| A durable X-vs-Y analysis | `~/wiki/comparisons/` | wiki-query offers to file it back — say yes |
+| A standing fact about yourself ("I hate X in a mix") | `~/wiki/entities/me.md` | distill proposes it |
+
+Rules of thumb:
+- **About one project's direction** → that project's `decisions.md` / driver (`plan.md` or `CONTEXT.md`)
+- **About you as a person, beyond one project** → `~/wiki/entities/me.md`
+- **Fact about the world, useful across projects** → wiki
+- **Fleeting / personal / unformed** → notes, promoted later
+- **Raw artifact** → `~/data/<project>/`, ingested when it earns it
+
+## Anti-patterns — the ways this rots
+
+- **Pasting a 30-page doc into chat** and hoping it's remembered. `~/data` + ingest is the path.
+- **Editing files in `~/data`.** Read-only corpus; wiki pages cite into it.
+- **Crossing the streams.** Project state in the wiki, or world-facts buried in one project's
+  decisions.md — both make retrieval rot. Route by the table above.
+- **Skipping the file-back offer** after a good query. That offer IS the compounding mechanism.
+- **`[[wikilinks]]`.** Relative markdown links only — they survive any renderer.
+- **Giant wiki pages.** One concept per file; split past ~150 lines.
+- **Deep folder taxonomies.** Items belong to multiple categories; links + tags + the index
+  carry structure. Directories stay shallow.
+
 ## Why it's built this way
 
 - **Memory routed by kind.** Project state, world knowledge, and personal notes live in separate homes with separate lifecycles, not one opaque bucket. Nothing is written behind your back; `git log` is the audit trail.

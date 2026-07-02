@@ -35,21 +35,17 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    First **reconcile**: a decision made or inconsistency resolved that never reached
    `decisions.md`, or plan movement not yet in the driver — propose it now (grep decisions.md
    first; already recorded means don't re-propose). Rare if you logged as you worked. Also surface **abandoned approaches**: something tried that hit a surprising failure or dead end and was dropped — "tried X, got Y, went with Z" — so the next session doesn't re-derive it; route to decisions.md, or a wiki page if it's a cross-project gotcha.
-   Then the **sweep** — the candidates that only surface at session end:
-   - **wiki:** did the session produce knowledge that is durable (true in 6+ months),
-     cross-project, about the world (not this repo's internals), and cost real effort to
-     learn? Propose it as a wiki candidate naming the target page (full litmus in
-     `$PLAINBRAIN_WIKI/CLAUDE.md`).
-   - **skill — capture:** did a repeatable procedure emerge that would cost the next session
-     real time to re-derive? Signals: a multi-step sequence that worked only after iteration;
-     a non-obvious gotcha you found the workaround for; a convention or recipe the user will
-     reuse; the user said "remember how to do this." Propose a skill draft — project-bound →
-     `.claude/skills/` in the repo; cross-project → `~/.claude/skills/`. Facts go to the wiki;
-     procedures become skills (a SKILL.md is born only on approval).
-   - **skill — repair:** did an existing skill misfire or show stale instructions this
-     session? Propose the minimal SKILL.md fix.
-   - **me.md:** a standing fact about the user as a person, useful beyond this project →
-     `$PLAINBRAIN_WIKI/entities/me.md`.
+   Then the **sweep** — the candidates that only surface at session end (what to look for;
+   destinations and write-rules are all in step 3):
+   - **wiki:** knowledge that is durable (true in 6+ months), cross-project, about the world
+     (not this repo's internals), and cost real effort to learn (full litmus in
+     `$PLAINBRAIN_WIKI/CLAUDE.md`). Facts go to the wiki; procedures become skills.
+   - **skill — capture:** a repeatable procedure that would cost the next session real time to
+     re-derive. Signals: a multi-step sequence that worked only after iteration; a non-obvious
+     gotcha you found the workaround for; a convention or recipe the user will reuse; the user
+     said "remember how to do this."
+   - **skill — repair:** an existing skill that misfired or showed stale instructions this session.
+   - **me.md:** a standing fact about the user as a person, useful beyond this project.
    Most sessions produce no sweep candidates — that's the expected answer.
 
 3. **Propose, then WAIT for approval.** Present the candidates (typically 0–3) as a short
@@ -66,8 +62,9 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    - cross-project world-fact passing the wiki litmus → a page in `$PLAINBRAIN_WIKI`, filed
      directly (update index.md; commit noting "filed from session"); full
      wiki-ingest only when a real source file exists in `$PLAINBRAIN_DATA` or `$PLAINBRAIN_NOTES`
-   - repeatable procedure (capture) or skill misfire (repair) → a SKILL.md draft or
-     minimal fix, shown in full before writing
+   - repeatable procedure (capture) or skill misfire (repair) → a SKILL.md draft (project-bound
+     → `.claude/skills/` in the repo; cross-project → `~/.claude/skills/`) or minimal fix, shown
+     in full before writing (a SKILL.md is born only on approval)
    - off-project or unformed → a stub note in `$PLAINBRAIN_NOTES` (inbox), for later routing
    - project CLAUDE.md contradicts reality → flag it in the list; never edit CLAUDE.md here
    **If nothing durable changed, say so and stop.** Do not invent entries to look productive.
