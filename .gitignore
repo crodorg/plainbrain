@@ -1,2 +1,4 @@
-# Local kit state — never ship the activation marker or session state in the distribution repo.
-.claude/
+# Local kit activation + session state — never shipped. Everything else in .claude/ is tracked
+# (the repo dogfoods its own layout: decisions.md at root, adoption marker + state ignored).
+.claude/plainbrain
+.claude/state/
