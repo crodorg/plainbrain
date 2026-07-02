@@ -82,6 +82,7 @@ note "projects=$PROJECTS data=$DATA notes=$NOTES wiki=$WIKI"
 # Wiki scaffold — only into an empty/new wiki; never overwrite an existing one.
 if [ -z "$(ls -A "$WIKI"/*.md 2>/dev/null)" ]; then
   cp "$KIT"/wiki/*.md "$WIKI"/ 2>/dev/null || true
+  [ -f "$KIT/wiki/entities/people.md" ] && cp "$KIT/wiki/entities/people.md" "$WIKI"/entities/ 2>/dev/null || true
   [ -f "$KIT/wiki/.gitignore" ] && cp "$KIT/wiki/.gitignore" "$WIKI"/ 2>/dev/null || true
   if [ ! -d "$WIKI/.git" ] && command -v git >/dev/null 2>&1; then
     ( cd "$WIKI" && git init -q && git add -A && git commit -q -m "init wiki" ) || true

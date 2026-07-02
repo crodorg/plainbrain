@@ -12,6 +12,7 @@ you curate sources, ask questions, and may hand-edit any page. It is plain markd
   index.md         # catalog of every page (link + one-line summary), read FIRST on query
   log.md           # append-only, chronological, greppable record of ingests/queries/lints
   entities/        # one page per concrete thing: a company, person, product, place
+  entities/people.md  # the trust roster: authors/figures + weight tier (see Attribution)
   concepts/        # one page per idea, method, framework, mechanism
   comparisons/     # head-to-head analyses, tables, "X vs Y" pages
   sources/         # one summary page per ingested source, citing the raw file path
@@ -78,6 +79,24 @@ Linking: relative markdown links, e.g. `[Globex](../entities/globex.md)`. Filena
 lowercase-kebab. One concept per file — small pages so retrieval pulls a node, not a tome.
 Tags are the subcategory layer — multiple per page, greppable (`grep -rl 'tags:.*banking'
 entities/`); directories stay shallow, links and tags carry the structure.
+
+## Attribution: roster, sources, maps
+
+Knowledge here is **attributed and weighted**, never flattened into one anonymous voice.
+
+- **`entities/people.md` — the trust roster.** One entry per author/figure the wiki tracks,
+  each with a **tier** (how much weight their claims carry). Source authors link here and
+  inherit the tier; conflicting claims are weighed by it.
+- **Source pages carry `by:` and `depth:`.** `by:` links the author to their `people.md` /
+  `entities/` page (the source inherits that author's tier); `depth:` is `full | partial | skim`.
+- **Concept pages are maps of attributed claims.** Under a `## The map` heading, each bullet is
+  one source-claim, attributed and pinned to a verbatim quote — never a brittle line number:
+  `- Per <Person> ([anchor](raw-path#anchor)): <claim> — "<verbatim quote>"`.
+  `wiki-check.sh` flags any unattributed `## The map` bullet. Claude writes only the map, never
+  a synthesized verdict.
+- **`## My read` is yours.** A concept page may carry a `## My read` section for your own
+  synthesis; Claude never writes or edits it.
+- **Disagreements become `comparisons/` disputes** — stub the conflict, don't silently pick a side.
 
 ## Workflows (full steps live in the skills)
 

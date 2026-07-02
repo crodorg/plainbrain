@@ -9,6 +9,7 @@ entries, split it per-category.
 - [overview.md](overview.md) — top-level synthesis and entry point
 
 ## Entities
+- [People (trust roster)](entities/people.md) — authors/figures and their weight tier
 <!-- [Name](entities/name.md) — one-line description -->
 
 ## Concepts
