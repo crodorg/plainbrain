@@ -1,6 +1,6 @@
 ---
 name: distill
-description: Distill a Claude Code work session into durable memory — the deliberate end-of-session sweep. decisions.md and the driver are kept current as you work; distill catches what only surfaces at the end: wiki-worthy knowledge, new or repaired skills, standing facts about you. Proposes a short candidate list for approval, routes each to its home, then commits. Run before /exit, when wrapping up a session, or after resolving a decision; also reconciles any decision or plan change not yet written.
+description: Distill a work session into durable memory — the deliberate end-of-session sweep. decisions.md and the driver are kept current as you work; distill catches what only surfaces at the end: wiki-worthy knowledge, new or repaired skills, standing facts about you. Proposes a short candidate list for approval, routes each to its home, then commits. Run when wrapping up a session, or after resolving a decision; also reconciles any decision or plan change not yet written.
 ---
 
 # distill

@@ -56,7 +56,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 ## Install
 
-Requirements: Claude Code, git, bash — that's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
+Requirements: Claude Code (or opencode — see [Not just Claude](#not-just-claude)), git, bash — that's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
 
 ```sh
 git clone https://github.com/crodorg/plainbrain
@@ -152,15 +152,29 @@ Even if you don't adopt the whole thing, a few pieces stand on their own:
 
 ## Not just Claude
 
-plainbrain ships wired for Claude Code because that's where it was born, but nothing about
-the *system* is Claude-specific. The memories are markdown. The hooks are plain shell scripts
-fired on ordinary lifecycle events (session start, context compaction, session end, prompt
-submit). The skills are natural-language instruction files — any capable model can follow them.
+plainbrain ships wired for Claude Code because that's where it was born, but nothing about the
+*system* is Claude-specific. The three memories are plain markdown. The five skills are
+natural-language instruction files any capable model can follow. Only the four hooks are wired
+to one agent's lifecycle.
 
-To port it: re-wire the four hooks to your agent's equivalent events, and expose the skill
-files as instructions your agent loads on demand. The files themselves — `plan.md`,
-`decisions.md`, the wiki — don't care what reads them. That's the point: your accumulated
-knowledge shouldn't be hostage to this year's tool.
+On [opencode](https://opencode.ai) — which reads the same
+[Claude-compatible paths](https://opencode.ai/docs/rules/) — most of it works with no setup:
+
+- **Rules** load from `~/.claude/CLAUDE.md` (the global conventions) and each project's
+  `CLAUDE.md` (the driver pointer), exactly where the installer already puts them. Don't drop an
+  `AGENTS.md` next to them — opencode reads `AGENTS.md` *instead of* `CLAUDE.md` when both exist,
+  so it would shadow the file and split your rules across two copies.
+- **Skills** load from `~/.claude/skills/`. opencode selects one by matching your request to its
+  description (via a built-in `skill` tool) rather than a `/`-command — you still just ask for it
+  by name ("distill", "adopt this project").
+
+The one harness-specific piece is the four lifecycle hooks — session start, context compaction,
+session end, prompt submit. Claude Code fires them from `settings.json`, which opencode doesn't
+read; porting them means re-homing the same four shell scripts onto opencode's plugin lifecycle.
+One small adapter per harness — the scripts themselves don't change.
+
+The files underneath — `plan.md`, `decisions.md`, the wiki — don't care what reads them. That's
+the point: your accumulated knowledge shouldn't be hostage to this year's tool.
 
 ## Who this is for
 
