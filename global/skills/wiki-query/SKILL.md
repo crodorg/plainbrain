@@ -14,7 +14,12 @@ don't reach for it unprompted. The whole point of this skill is to report what t
 
 Steps:
 
-1. **Read `index.md` first** to locate the relevant pages — don't load the whole wiki.
+1. **Read `index.md` first** to locate the relevant pages — don't load the whole wiki. The
+   index is the map, not the only key: also **grep the frontmatter tags** for the query's terms
+   (`grep -rl 'tags:.*<term>' entities concepts comparisons sources`) and glance at the page
+   filenames (descriptive kebab-case), so a page whose one-line summary happens not to match
+   your phrasing — or one an interrupted ingest never added to the index — still surfaces.
+   Summary, tags, and filename are three recall keys; don't rely on only one.
 
 2. **Drill into the relevant pages.** Follow cross-links. Open raw sources under `$PLAINBRAIN_DATA`
    or `$PLAINBRAIN_NOTES` only when a page's summary isn't enough to answer well. When a page answers the question, also check its open-questions/contradictions section and any indexed page taking a contrary position before you settle — confirm against the disagreement, don't stop at the first hit.

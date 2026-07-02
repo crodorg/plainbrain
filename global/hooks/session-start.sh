@@ -27,18 +27,19 @@ git status --short 2>/dev/null | head -20
 echo
 git log --oneline -5 2>/dev/null
 echo
-if [ -f plan.md ]; then
-  echo "### Driver: read ./plan.md — it is the driver for this project."
-elif [ -f CONTEXT.md ]; then
-  echo "### Driver: read ./CONTEXT.md — it is the driver for this project."
+# Driver: the marker may name it (`driver: plan.md`); else fall back to file-existence
+# (plan.md wins), which mis-guesses a CONTEXT-driven hybrid that also carries a plan.md.
+driver=$(sed -n 's/^driver:[[:space:]]*//p' .claude/plainbrain 2>/dev/null | head -1 | tr -d '[:space:]')
+if [ -z "$driver" ]; then
+  [ -f plan.md ] && driver="plan.md"
+  [ -z "$driver" ] && [ -f CONTEXT.md ] && driver="CONTEXT.md"
 fi
+[ -n "$driver" ] && [ ! -f "$driver" ] && driver=""    # named driver file missing -> none
+[ -n "$driver" ] && echo "### Driver: read ./$driver — it is the driver for this project."
 
 # --- driver staleness ---------------------------------------------------------
 # Soft nudge when the driver hasn't moved while work kept going (intent may have
 # drifted from the code). Not a gate. Tune/disable via PLAINBRAIN_DRIVER_STALE_COMMITS.
-driver=""
-[ -f plan.md ] && driver="plan.md"
-[ -z "$driver" ] && [ -f CONTEXT.md ] && driver="CONTEXT.md"
 if [ -n "$driver" ]; then
   dts=$(git log -1 --format=%cI -- "$driver" 2>/dev/null)
   if [ -n "$dts" ]; then
@@ -80,5 +81,11 @@ if [ -f .claude/state/.pending-distill ]; then
   echo "     (in ~/wiki: run wiki-lint instead)"
   echo "  b) keep accumulating — proceed; distill later"
   echo "  c) discard — drop the dirty changes (destructive; only with explicit confirmation)"
+fi
+
+if [ -s .claude/state/decisions.scratch ]; then
+  echo
+  echo "### Unreconciled rationale"
+  echo "$(grep -c . .claude/state/decisions.scratch 2>/dev/null) line(s) parked in decisions.scratch by an earlier session — distill folds them into decisions.md (or drops them)."
 fi
 exit 0

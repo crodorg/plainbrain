@@ -102,6 +102,33 @@ big=$(for p in $pages; do
 done)
 [ -n "$big" ] && { echo 'scale: pages over ~150 lines (split — one concept per file):'; printf '%s\n' "$big"; }
 
+# Tag histogram (informational) — the auto-surface retrieval vocabulary. Singletons are often
+# synonyms/typos to merge; ⚠ marks a tag the wiki-surface hook can't match (multi-word, or under
+# 4 chars). Bracket-form `tags: [a, b]` only. Tag hygiene is retrieval recall.
+alltags=$(for p in $pages; do
+  head -20 "$p" | sed -n 's/^tags:[[:space:]]*\[\(.*\)\]/\1/p' | tr ',' '\n'
+done | sed 's/^[[:space:]"'\'']*//; s/[[:space:]"'\'']*$//' | grep -v '^$')
+if [ -n "$alltags" ]; then
+  echo 'tags (count · tag · ⚠=unsurfaceable):'
+  printf '%s\n' "$alltags" | sort | uniq -c | sort -rn | while read -r c t; do
+    warn=""
+    case "$t" in *" "*) warn=' ⚠multi-word' ;; esac
+    [ "$(printf %s "$t" | wc -c)" -lt 4 ] && warn="$warn ⚠short"
+    printf '  %3d  %s%s\n' "$c" "$t" "$warn"
+  done
+fi
+
+# Inbox (informational) — notes touched since the last lint: promotion candidates for the wiki.
+# Promotion is manual (wiki-query/ingest); this just keeps the inbox from rotting unseen.
+NOTES="${PLAINBRAIN_NOTES:-$HOME/notes}"
+if [ -d "$NOTES" ]; then
+  lastlint=$(ls -1t _lint/*.md 2>/dev/null | head -1)
+  if [ -n "$lastlint" ]; then
+    fresh=$(find "$NOTES" -name '*.md' -newer "$lastlint" 2>/dev/null | wc -l | tr -d ' ')
+    [ "${fresh:-0}" -gt 0 ] && printf 'inbox: %s note(s) touched since last lint — review for wiki promotion\n' "$fresh"
+  fi
+fi
+
 count=$(printf '%s\n' "$pages" | grep -c . )
 if [ -n "$out" ]; then
   printf '%s\n' "$out"

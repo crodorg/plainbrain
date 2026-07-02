@@ -35,7 +35,9 @@ plan.md). Modules are added or dropped later by re-running this skill.
    - `CLAUDE.md` — merge with existing (keep their rules, add the pointer block from
      the template at `~/.claude/project-template/`). The pointer block lists
      ONLY the files this project carries and names the **driver** (plan.md or
-     CONTEXT.md). Lean.
+     CONTEXT.md). Lean. Record the same driver in the `.claude/plainbrain` marker as a
+     `driver: <file>` line — the session-start hook reads it, so a CONTEXT-driven hybrid
+     that also carries a plan.md isn't mis-detected. Omit the line for a core-only project.
    - `decisions.md` — template header; seed timestamped entries for big already-made
      decisions surfaced by interview/archive (marked retroactive).
    - `plan.md` (if chosen) — Goal/Constraints/Decisions (stable) + phased Status

@@ -41,5 +41,8 @@ Steps:
 
 8. **Commit** with a message naming the source.
 
-Keep pages small and single-topic. Link by relative markdown path. Never modify files in
-`$PLAINBRAIN_DATA` or `$PLAINBRAIN_NOTES` — they are read-only sources.
+Keep pages small and single-topic. Link by relative markdown path. **Reuse an existing tag
+before coining a new one** — grep the current vocabulary (`grep -rho 'tags:.*' entities concepts
+comparisons sources | tr ',[]' '\n'`) and prefer a tag already in use; tags are the auto-surface
+retrieval key, so synonym drift (`llm` / `llms` / `language-model`) silently degrades recall.
+Never modify files in `$PLAINBRAIN_DATA` or `$PLAINBRAIN_NOTES` — they are read-only sources.
