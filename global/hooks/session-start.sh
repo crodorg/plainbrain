@@ -67,7 +67,7 @@ WIKI="${PLAINBRAIN_WIKI:-$HOME/wiki}"
 if [ -d "$WIKI" ]; then
   echo
   echo "### Wiki"
-  echo "$(find "$WIKI" -name '*.md' ! -path '*/_lint/*' | wc -l | tr -d ' ') pages — relevant ones auto-surface by tag on Bash calls; /wiki-query to search"
+  echo "$(find "$WIKI" -name '*.md' ! -path '*/_lint/*' | wc -l | tr -d ' ') pages — relevant ones surface by tag on your prompts; /wiki-query to search"
 fi
 
 if [ -f .claude/state/.pending-distill ]; then

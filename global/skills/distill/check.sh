@@ -19,8 +19,20 @@ if [ -n "$dirty" ]; then
   exit 0
 fi
 
+# Scope to "this session." The shared .session-start points at whichever session started LAST,
+# which under concurrency can under-scope another session's distill (fast-pathing past its real
+# commits). Prefer the earliest per-session start marker newer than the last distill — the
+# widest safe window since the last save — and fall back to the shared marker.
+last=0; [ -f .claude/state/.last-distill ] && last=$(cat .claude/state/.last-distill 2>/dev/null || echo 0)
 start=0
-[ -f .claude/state/.session-start ] && start=$(cat .claude/state/.session-start 2>/dev/null || echo 0)
+for m in .claude/state/sessions/*.start; do
+  [ -f "$m" ] || continue
+  t=$(cat "$m" 2>/dev/null || echo 0)
+  case "$t" in ''|*[!0-9]*) continue ;; esac
+  [ "$t" -gt "${last:-0}" ] || continue
+  { [ "$start" -eq 0 ] || [ "$t" -lt "$start" ]; } && start=$t
+done
+[ "$start" -eq 0 ] && [ -f .claude/state/.session-start ] && start=$(cat .claude/state/.session-start 2>/dev/null || echo 0)
 if [ "${start:-0}" -le 0 ] 2>/dev/null; then
   echo "COMMITS-NO-DURABLES: no session-start marker; cannot scope to this session"
   exit 0
