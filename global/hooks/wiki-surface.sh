@@ -4,7 +4,8 @@
 # a .claude/plainbrain marker, so un-adopted repos and non-repo sessions get nothing.
 # Non-blocking (always exits 0), silent on no match, once-per-tag-per-session.
 # Matches a page's `tags:` (bracket OR YAML block form) against the words in the user's prompt
-# (or the Bash command) + cwd; on a hit, injects the page's H1 + first paragraph.
+# (or the Bash command) + cwd; on a hit, injects the page's title + path (NOT its body — the
+# model opens the page itself if it's on-topic, so untrusted source text never lands in context).
 # A matched tag fires only once per session (a broad project tag won't dribble its pages out
 # call after call). Tuning knob: STOP (stoplist) + MIN_LEN below. Needs python3 — prints a
 # one-time note and stays off if it's missing.
@@ -21,6 +22,9 @@ WIKI="${PLAINBRAIN_WIKI:-$HOME/wiki}"
 STATE_DIR="$HOME/.claude/state"
 [ -d "$WIKI" ] || exit 0
 mkdir -p "$STATE_DIR" 2>/dev/null || exit 0
+
+# Prune stale per-session dedupe files so ~/.claude/state doesn't accumulate forever.
+find "$STATE_DIR" -name 'wiki-surfaced-*.txt' -mtime +7 -delete 2>/dev/null || true
 
 # This hook uses python3 for robust JSON parsing (parsing arbitrary shell commands out of the
 # payload in pure sh would be worse). If python3 is absent, surface a one-time note instead of
@@ -80,16 +84,18 @@ def main():
         text = (payload.get("tool_input") or {}).get("command", "") or ""
 
     # Words actually present (>= MIN_LEN chars).
-    MIN_LEN = 4
+    try:
+        MIN_LEN = int(os.environ.get("PLAINBRAIN_WIKI_SURFACE_MINLEN", "4"))
+    except ValueError:
+        MIN_LEN = 4
     haystack = (text + " " + cwd).lower()
     words = set(re.findall(r"[a-z0-9][a-z0-9-]{%d,}" % (MIN_LEN - 1), haystack))
     if not words:
         return
 
     # Generic terms that would fire on noise: path-structural words (always in a cwd),
-    # shell builtins, and broad low-signal tags. This is the main tuning surface —
-    # add YOUR wiki's overly-general tags to the last group so they don't fire on
-    # incidental mentions.
+    # shell builtins, and broad low-signal tags. These are just defaults — tune per-wiki in
+    # the user-owned stoplist file below (which survives update.sh), not here.
     STOP = {
         # path-structural — present in nearly every cwd / path
         "home", "user", "projects", "project", "data", "notes", "note", "wiki",
@@ -99,10 +105,21 @@ def main():
         # shell builtins / ubiquitous command words
         "source", "test", "tests", "build", "make", "sudo", "grep",
         "find", "echo", "bash", "shell", "file", "files", "page",
-        # broad / low-signal tags (examples — tune to your wiki's tag vocabulary)
+        # broad / low-signal tags (technical-wiki defaults; extend in the stoplist file)
         "agent", "agents", "tool", "tools", "tooling", "security", "library",
         "coding", "automation", "quality", "comparison",
     }
+    # User-tunable extra stop-tags live OUTSIDE this kit-owned hook so they survive update.sh:
+    # one lowercase tag per line in ~/.config/plainbrain/stoplist (`#` comments ok).
+    try:
+        _sf = os.path.expanduser(os.environ.get("PLAINBRAIN_STOPLIST", "~/.config/plainbrain/stoplist"))
+        with open(_sf, errors="ignore") as _f:
+            for _line in _f:
+                _w = _line.strip().lower()
+                if _w and not _w.startswith("#"):
+                    STOP.add(_w)
+    except OSError:
+        pass
 
     # Pass 1: read front-matter tags + type from every page; doc-frequency per tag.
     data = []
@@ -124,7 +141,13 @@ def main():
                 continue
             tm = re.search(r"(?m)^type:\s*(\S+)", chunk)
             typ = tm.group(1).strip().lower() if tm else ""
-            data.append((p, tags, typ))
+            titm = re.search(r"(?m)^title:\s*(.+)", chunk)
+            if titm:
+                title = titm.group(1).strip().strip("\"'")
+            else:
+                h1 = re.search(r"(?m)^#\s+(.+)", chunk)
+                title = h1.group(1).strip() if h1 else fn[:-3]
+            data.append((p, tags, typ, title))
             for t in set(tags):
                 df[t] = df.get(t, 0) + 1
 
@@ -145,52 +168,28 @@ def main():
     # Pass 2: a page is a candidate if one of its still-fresh tags is a whole word in
     # the haystack. Rank by type, then tag rarity, then tag length.
     cands = []
-    for p, tags, typ in data:
+    for p, tags, typ, title in data:
         if p in seen_pages:
             continue
         fresh = [t for t in tags if t in words and t not in seen_tags]
         if not fresh:
             continue
         best = min(fresh, key=lambda t: (df.get(t, 999), -len(t)))
-        cands.append((TYPE_RANK.get(typ, 1), df.get(best, 999), -len(best), p, best))
+        cands.append((TYPE_RANK.get(typ, 1), df.get(best, 999), -len(best), p, best, title))
     if not cands:
         return
     cands.sort(key=lambda x: (x[0], x[1], x[2]))
     chosen = cands[:2]  # cap injected pages per call
 
-    def summarize(path):
-        try:
-            with open(path, errors="ignore") as f:
-                txt = f.read(4000)
-        except OSError:
-            return os.path.basename(path), ""
-        body = re.sub(r"(?s)\A---.*?\n---\s*", "", txt, count=1)
-        lines = body.splitlines()
-        i = 0
-        while i < len(lines) and not lines[i].startswith("# "):
-            i += 1
-        title = lines[i][2:].strip() if i < len(lines) else os.path.basename(path)
-        i += 1
-        while i < len(lines) and not lines[i].strip():
-            i += 1
-        para = []
-        while i < len(lines) and lines[i].strip() and not lines[i].startswith("#"):
-            para.append(lines[i].strip())
-            i += 1
-        return title, " ".join(para)
-
     parts, fired_tags, fired_pages = [], set(), []
-    for _tr, _dfv, _nl, p, best in chosen:
-        title, para = summarize(p)
-        if len(para) > 500:
-            para = para[:500].rstrip() + "…"
+    for _tr, _dfv, _nl, p, best, title in chosen:
         rel = os.path.relpath(p, wiki)
-        parts.append("**%s**\n%s\n→ %s/%s  (matched tag: %s)" % (title, para, wiki, rel, best))
+        parts.append("**%s** — %s/%s  (matched tag: %s)" % (title, wiki, rel, best))
         fired_pages.append(p)
         fired_tags.add(best)
 
-    ctx = ("📖 Relevant wiki page(s) for what you're working on — read before proceeding if on-topic:\n\n"
-           + "\n\n".join(parts))
+    ctx = ("📖 Possibly-relevant wiki page(s) — open and read if on-topic:\n\n"
+           + "\n".join(parts))
 
     try:
         with open(seen_path, "a") as f:
