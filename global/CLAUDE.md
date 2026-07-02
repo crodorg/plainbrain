@@ -1,13 +1,13 @@
 # Global rules (~/.claude/CLAUDE.md)
 
-Loaded into every Claude Code session. Keep this short — every line is paid on every
+Loaded into every session (Claude Code natively; opencode via its `~/.claude/CLAUDE.md` fallback). Keep this short — every line is paid on every
 message. These are the plainbrain conventions — merge what you like into your own
 global rules; the project-discipline section is the load-bearing part.
 
 ## Project discipline
 - Every project carries `decisions.md` (append-only "what + why") plus the modules that fit:
   `plan.md` (phased execution), `CONTEXT.md` (standing knowledge), `ARCHITECTURE.md` (codebase
-  map). Its CLAUDE.md names the **driver** — plan.md or CONTEXT.md.
+  map). Its AGENTS.md names the **driver** — plan.md or CONTEXT.md.
 - Read the driver before working. Drivers have **stable sections** (rarely change) and
   **volatile subsections** (change during execution).
 - When you hit an inconsistency mid-task, do NOT silently rewrite the plan. Record it in
@@ -30,7 +30,7 @@ global rules; the project-discipline section is the load-bearing part.
 
 ## Where things live
 Homes honor `$PLAINBRAIN_*` env vars (set in `~/.config/plainbrain/env`); defaults shown.
-- `$PLAINBRAIN_PROJECTS` (default `~/projects`)`/<name>` — each its own repo: CLAUDE.md + decisions.md + the modules that fit
+- `$PLAINBRAIN_PROJECTS` (default `~/projects`)`/<name>` — each its own repo: AGENTS.md + decisions.md + the modules that fit
 - `$PLAINBRAIN_WIKI` (default `~/wiki`) — the knowledge wiki (compiled, interlinked markdown; query it first)
 - `$PLAINBRAIN_WIKI/entities/me.md` — the user's standing philosophy, taste, voice. Read it before
   creative choices, drafting, or preference-sensitive work — don't guess.
@@ -48,4 +48,4 @@ Homes honor `$PLAINBRAIN_*` env vars (set in `~/.config/plainbrain/env`); defaul
   read/fetched this conversation. Tag unsourced claims as unverified.
 - Durable findings worth keeping → offer the wiki so next time the answer is local and cited.
 
-Keep every CLAUDE.md (this one and per-project) lean.
+Keep this file and every per-project AGENTS.md lean.

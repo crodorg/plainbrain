@@ -22,7 +22,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    Either way, if `.claude/state/decisions.scratch` exists, read it — parked *why* lines not
    yet in `decisions.md` are themselves something to distill (reconcile them in step 2).
 
-1. **Locate the project.** `git rev-parse --show-toplevel`. Read the project's CLAUDE.md
+1. **Locate the project.** `git rev-parse --show-toplevel`. Read the project's AGENTS.md (or CLAUDE.md)
    pointer block: it declares which durable files this project carries (core: decisions.md;
    modules: plan.md, CONTEXT.md, ARCHITECTURE.md) and which one is the driver. Read the
    declared files. Route ONLY to declared files — never create a missing module (no plan.md
@@ -66,7 +66,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
      → `.claude/skills/` in the repo; cross-project → `~/.claude/skills/`) or minimal fix, shown
      in full before writing (a SKILL.md is born only on approval)
    - off-project or unformed → a stub note in `$PLAINBRAIN_NOTES` (inbox), for later routing
-   - project CLAUDE.md contradicts reality → flag it in the list; never edit CLAUDE.md here
+   - project AGENTS.md/CLAUDE.md contradicts reality → flag it in the list; never edit it here
    **If nothing durable changed, say so and stop.** Do not invent entries to look productive.
 
 4. **Write exactly what was approved** — nothing more. **Bias to additive:** a new small page or an appended section beats rewriting an existing page's body; a body-rewrite of standing content needs a strong reason and usually loses to a new page (the diff stays legible, nothing is silently overwritten). decisions.md is append-only; plan.md's *volatile* subsections are the deliberate exception.

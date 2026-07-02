@@ -1,7 +1,7 @@
 # Architecture — <project-name>
 
 The codebase map: what each part is, so a session can orient without reading everything.
-Update when the structure changes. Keep entries terse. This is referenced from CLAUDE.md so
+Update when the structure changes. Keep entries terse. This is referenced from AGENTS.md so
 that file can stay lean.
 
 ## Layout

@@ -1,6 +1,6 @@
 ---
 name: adopt-project
-description: Bring a project into the knowledge-system layout — git repo, gitignored .claude/state/, core (CLAUDE.md + decisions.md) plus only the modules that fit (plan.md, ARCHITECTURE.md, CONTEXT.md). Works on existing, brand-new, and already-adopted projects (add/drop a module). Use on "adopt this project", "convert this to the kit", "new project", or kit-style work in a repo lacking kit files. Drafts everything for approval before writing.
+description: Bring a project into the knowledge-system layout — git repo, gitignored .claude/state/, core (AGENTS.md + decisions.md) plus only the modules that fit (plan.md, ARCHITECTURE.md, CONTEXT.md). Works on existing, brand-new, and already-adopted projects (add/drop a module). Use on "adopt this project", "convert this to the kit", "new project", or kit-style work in a repo lacking kit files. Drafts everything for approval before writing.
 ---
 
 # adopt-project
@@ -8,7 +8,7 @@ description: Bring a project into the knowledge-system layout — git repo, giti
 Run inside the project directory. Goal: the core plus the modules that earn their keep,
 with real content, nothing clobbered, hooks live. Adoption is a conversation, not a scan.
 
-**Core (every project):** git repo + `CLAUDE.md` + `decisions.md`.
+**Core (every project):** git repo + `AGENTS.md` (+ a one-line `CLAUDE.md` that imports it, for Claude Code) + `decisions.md`.
 **Modules (only where they fit):**
 - `plan.md` — there is phased execution to drive (driver for execution projects)
 - `ARCHITECTURE.md` — there is a codebase to map
@@ -20,7 +20,7 @@ plan.md). Modules are added or dropped later by re-running this skill.
 
 1. **Survey.** Is it a git repo? If not, flag that hooks have been inert here and
    `git init` (with user OK) + a sensible .gitignore is step one. Read existing
-   CLAUDE.md / README / docs; `git log --oneline -30` for trajectory; skim
+   AGENTS.md/CLAUDE.md / README / docs; `git log --oneline -30` for trajectory; skim
    `$PLAINBRAIN_DATA/<name>/memory-archive/` if present (MEMORY.md first) — it holds the
    project's prior working state.
 2. **Gitignore + activate.** Ensure `.claude/state/` is ignored; `git rm -r --cached` any
@@ -32,10 +32,12 @@ plan.md). Modules are added or dropped later by re-running this skill.
    short questions: current goal or direction, what's in flight, what's locked, what
    Claude must know to work well here. Don't guess intent from files.
 4. **Draft every chosen file, show them all, get approval BEFORE writing any:**
-   - `CLAUDE.md` — merge with existing (keep their rules, add the pointer block from
+   - `AGENTS.md` — merge with existing (keep their rules, add the pointer block from
      the template at `~/.claude/project-template/`). The pointer block lists
      ONLY the files this project carries and names the **driver** (plan.md or
-     CONTEXT.md). Lean. Record the same driver in the `.claude/plainbrain` marker as a
+     CONTEXT.md). Lean. Also drop a one-line `CLAUDE.md` (`@AGENTS.md`) beside it so
+     secondary Claude Code reads the same rules — a plain import, not a symlink; skip it
+     for an opencode-only project. Record the same driver in the `.claude/plainbrain` marker as a
      `driver: <file>` line — the session-start hook reads it, so a CONTEXT-driven hybrid
      that also carries a plan.md isn't mis-detected. Omit the line for a core-only project.
    - `decisions.md` — template header; seed timestamped entries for big already-made
@@ -55,4 +57,5 @@ plan.md). Modules are added or dropped later by re-running this skill.
 only the delta — add the missing module, activate (drop `.claude/plainbrain`) if missing, or
 flag one that never earned its keep (dropping needs explicit user OK; git keeps the history). Never overwrite an existing
 plan.md / decisions.md / CONTEXT.md / ARCHITECTURE.md without explicit OK — merge or
-extend instead.
+extend instead. An existing real `CLAUDE.md` keeps working (both agents read it) — rename it
+to `AGENTS.md` + a `@AGENTS.md` stub only if the user wants the cross-tool layout.

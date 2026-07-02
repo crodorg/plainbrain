@@ -1,6 +1,6 @@
 # plainbrain
 
-**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and a handful of small shell scripts. Wired for [Claude Code](https://claude.com/claude-code) out of the box, portable to any agent that can read instructions and run shell. No database, no daemons, no vector store, no subscriptions.
+**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and a handful of small shell scripts. It plugs into whatever agent you drive — [opencode](https://opencode.ai), [Claude Code](https://claude.com/claude-code), or anything that reads plain instructions and runs shell. No database, no daemons, no vector store, no subscriptions.
 
 ## The problem
 
@@ -19,7 +19,7 @@ quick thoughts ──capture──────▶  ~/notes/            (git)    
 questions ──"query the wiki"──▶  cited answer ──filed back──────────────────────▶  (git)
 ```
 
-1. **Project state** — every repo carries `decisions.md` (append-only log of *what changed and why*, timestamped) plus the modules that fit: `plan.md` (intent, for projects that execute in phases), `CONTEXT.md` (standing knowledge — philosophy, taste, voice, constraints — for creative and idea projects), `ARCHITECTURE.md` (codebase map). The project's `CLAUDE.md` names which file is the **driver**; the AI reads it at session start and updates it at session end. There are no project "types" — hybrids compose modules.
+1. **Project state** — every repo carries `decisions.md` (append-only log of *what changed and why*, timestamped) plus the modules that fit: `plan.md` (intent, for projects that execute in phases), `CONTEXT.md` (standing knowledge — philosophy, taste, voice, constraints — for creative and idea projects), `ARCHITECTURE.md` (codebase map). The project's `AGENTS.md` names which file is the **driver**; the AI reads it at session start and updates it at session end. There are no project "types" — hybrids compose modules.
 2. **Knowledge** — `~/wiki`: small, single-topic markdown pages (entities, concepts, comparisons, sources) cross-linked with relative links and cataloged in one `index.md`. The AI does the bookkeeping; you supervise.
 3. **Inbox** — `~/notes`: your own notes, a first-class source the wiki can ingest.
 
@@ -52,11 +52,11 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 | `global/settings.json` | The hook wiring (merged into yours — never overwritten) |
 | `install.sh` / `update.sh` | Idempotent, backup-first installer + kit-file updater |
 | `wiki/` | Wiki scaffold: schema doc, index, overview, people roster |
-| `project-template/` | Core templates (CLAUDE.md, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
+| `project-template/` | Core templates (AGENTS.md + a one-line CLAUDE.md that imports it, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
 
 ## Install
 
-Requirements: Claude Code (or opencode — see [Not just Claude](#not-just-claude)), git, bash — that's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
+Requirements: git, bash, and a coding agent that runs them — opencode or Claude Code (see [Not just Claude](#not-just-claude)). That's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
 
 ```sh
 git clone https://github.com/crodorg/plainbrain
@@ -152,29 +152,27 @@ Even if you don't adopt the whole thing, a few pieces stand on their own:
 
 ## Not just Claude
 
-plainbrain ships wired for Claude Code because that's where it was born, but nothing about the
-*system* is Claude-specific. The three memories are plain markdown. The five skills are
-natural-language instruction files any capable model can follow. Only the four hooks are wired
-to one agent's lifecycle.
+Nothing about the *system* is tied to one agent. The three memories are plain markdown. The five
+skills are natural-language instruction files any capable model can follow. Only the four
+lifecycle hooks are wired to a specific agent.
 
-On [opencode](https://opencode.ai) — which reads the same
-[Claude-compatible paths](https://opencode.ai/docs/rules/) — most of it works with no setup:
+- **Rules.** A project's rules live in `AGENTS.md` — the cross-tool standard that
+  [opencode](https://opencode.ai) and others read directly. Claude Code reads only `CLAUDE.md`, so
+  each project also carries a one-line `CLAUDE.md` that imports it (`@AGENTS.md`) — a plain file,
+  not a symlink, so there's a single source of rules and nothing to keep in sync. The global
+  conventions install to `~/.claude/CLAUDE.md`, which both agents read (Claude natively, opencode
+  as its [documented fallback](https://opencode.ai/docs/rules/)).
+- **Skills** load from `~/.claude/skills/`. opencode picks one by matching your request to its
+  description (via a built-in `skill` tool) rather than a `/`-command — you still just ask for it by
+  name ("distill", "adopt this project").
 
-- **Rules** load from `~/.claude/CLAUDE.md` (the global conventions) and each project's
-  `CLAUDE.md` (the driver pointer), exactly where the installer already puts them. Don't drop an
-  `AGENTS.md` next to them — opencode reads `AGENTS.md` *instead of* `CLAUDE.md` when both exist,
-  so it would shadow the file and split your rules across two copies.
-- **Skills** load from `~/.claude/skills/`. opencode selects one by matching your request to its
-  description (via a built-in `skill` tool) rather than a `/`-command — you still just ask for it
-  by name ("distill", "adopt this project").
+The one agent-specific piece is the four lifecycle hooks — session start, context compaction,
+session end, prompt submit. Claude Code fires them from `settings.json`; another agent re-homes the
+same four shell scripts onto its own lifecycle (opencode via a plugin). One small adapter per
+agent — the scripts themselves don't change.
 
-The one harness-specific piece is the four lifecycle hooks — session start, context compaction,
-session end, prompt submit. Claude Code fires them from `settings.json`, which opencode doesn't
-read; porting them means re-homing the same four shell scripts onto opencode's plugin lifecycle.
-One small adapter per harness — the scripts themselves don't change.
-
-The files underneath — `plan.md`, `decisions.md`, the wiki — don't care what reads them. That's
-the point: your accumulated knowledge shouldn't be hostage to this year's tool.
+The files underneath — `plan.md`, `decisions.md`, the wiki — don't care what reads them. That's the
+point: your accumulated knowledge shouldn't be hostage to this year's tool.
 
 ## Who this is for
 
