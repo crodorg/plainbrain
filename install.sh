@@ -4,7 +4,7 @@
 #   ./install.sh --update   refresh only the kit-owned files (hooks, skills, CLI, template)
 #   flags: --pi / --no-pi   force-enable / -disable the Pi harness target (default: auto-detect)
 #
-# Never clobbers your data or merged config: an existing wiki, ~/.config/opencode/AGENTS.md,
+# Never clobbers your data or merged config: an existing wiki, ~/.claude/CLAUDE.md,
 # ~/.pi/agent/AGENTS.md, or settings.json is backed up and left for you to merge — only the
 # deterministic kit files are overwritten (and backed up first). jq is used for the settings
 # merge IF present; otherwise the hooks block is printed for you to paste in.
@@ -71,8 +71,8 @@ install_kit() {
   # Pi target (kit-owned bits: per-skill symlinks + the lifecycle extension). Refreshed on
   # --update too. Symlink each skill (Pi resolves symlinks; a symlinked *root* trips a Pi
   # config display bug) at ~/.claude/skills/<name> — one copy serves both harnesses, and the
-  # stable path survives this function's rm -rf/cp above. AGENTS.md placement is config, done
-  # in first-time setup below (like opencode's).
+  # stable path survives this function's rm -rf/cp above. Global-rules placement is config, done
+  # in first-time setup below.
   if pi_enabled; then
     say "pi skills + extension ->"
     mkdir -p "$PIAGENT/skills" "$PIAGENT/extensions"
@@ -128,19 +128,17 @@ else
   note "wiki already populated at $WIKI — left as-is"
 fi
 
-# Global rules -> opencode's native global AGENTS.md (write if absent; else leave a .plainbrain-new to merge).
+# Global rules -> Claude Code's native global CLAUDE.md (write if absent; else leave a .plainbrain-new to merge).
 say "global rules ->"
-OCODE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
-mkdir -p "$OCODE"
-if [ ! -f "$OCODE/AGENTS.md" ]; then
-  cp "$KIT/global/AGENTS.md" "$OCODE/AGENTS.md"
-  note "installed to $OCODE/AGENTS.md"
+mkdir -p "$CLAUDE"
+if [ ! -f "$CLAUDE/CLAUDE.md" ]; then
+  cp "$KIT/global/AGENTS.md" "$CLAUDE/CLAUDE.md"
+  note "installed to $CLAUDE/CLAUDE.md"
 else
-  backup "$OCODE/AGENTS.md"
-  cp "$KIT/global/AGENTS.md" "$OCODE/AGENTS.md.plainbrain-new"
-  note "you already have one — kit copy saved as AGENTS.md.plainbrain-new; merge what you want"
+  backup "$CLAUDE/CLAUDE.md"
+  cp "$KIT/global/AGENTS.md" "$CLAUDE/CLAUDE.md.plainbrain-new"
+  note "you already have one — kit copy saved as CLAUDE.md.plainbrain-new; merge what you want"
 fi
-# Using Claude Code too? It reads only CLAUDE.md — copy this to ~/.claude/CLAUDE.md, or import it.
 
 # Pi reads its own global AGENTS.md — same write-if-absent-else-.plainbrain-new logic.
 if pi_enabled; then
@@ -193,4 +191,4 @@ note "to apply overrides, add to your shell rc: [ -f ~/.config/plainbrain/env ] 
 
 say ""
 say "install complete. Backups (if any) in $BK"
-say "Next: open a repo in your agent (Claude Code / Pi / opencode) and run \"adopt this project\" to activate it."
+say "Next: open a repo in your agent (Claude Code / Pi) and run \"adopt this project\" to activate it."

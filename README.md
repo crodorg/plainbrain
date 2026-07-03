@@ -1,6 +1,6 @@
 # plainbrain
 
-**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and a handful of small shell scripts. It plugs into whatever agent you drive — [opencode](https://opencode.ai), [Claude Code](https://claude.com/claude-code), [Pi](https://pi.dev), or anything that reads plain instructions and runs shell. No database, no daemons, no vector store, no subscriptions.
+**Plain files, whole brain.** A memory and knowledge system for AI coding agents, built from markdown, git, and a handful of small shell scripts. It plugs into whatever agent you drive — [Claude Code](https://claude.com/claude-code), [Pi](https://pi.dev), or anything that reads plain instructions and runs shell. No database, no daemons, no vector store, no subscriptions.
 
 ## The problem
 
@@ -57,7 +57,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 ## Install
 
-Requirements: git, bash, and a coding agent that runs them — opencode, Claude Code, or Pi (see [Not just Claude](#not-just-claude)). That's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
+Requirements: git, bash, and a coding agent that runs them — Claude Code or Pi (see [Not just Claude](#not-just-claude)). That's the whole stack. (One optional hook, wiki-surface, additionally uses python3; without it that single hook stays off and prints a one-time note, and nothing else is affected.)
 
 ```sh
 git clone https://github.com/crodorg/plainbrain
@@ -65,7 +65,7 @@ cd plainbrain
 ./install.sh
 ```
 
-`install.sh` is idempotent and backup-first — it never clobbers your data or merged config. It creates the four homes and scaffolds an empty wiki, installs the hooks / skills / `plainbrain` CLI / project template into `~/.claude`, installs the global rules to `~/.config/opencode/AGENTS.md` only if you don't already have one (otherwise saves them as `AGENTS.md.plainbrain-new` to merge), merges **only** the hooks block into your `settings.json` (with `jq` if present, else prints it to paste — your permissions/env/statusLine are never touched), and writes `~/.config/plainbrain/env`. If Pi is detected (or you pass `--pi`), it also drops the global rules at `~/.pi/agent/AGENTS.md`, symlinks the skills into `~/.pi/agent/skills/`, and installs the lifecycle extension to `~/.pi/agent/extensions/plainbrain/` (`--no-pi` opts out).
+`install.sh` is idempotent and backup-first — it never clobbers your data or merged config. It creates the four homes and scaffolds an empty wiki, installs the hooks / skills / `plainbrain` CLI / project template into `~/.claude`, installs the global rules to `~/.claude/CLAUDE.md` only if you don't already have one (otherwise saves them as `CLAUDE.md.plainbrain-new` to merge), merges **only** the hooks block into your `settings.json` (with `jq` if present, else prints it to paste — your permissions/env/statusLine are never touched), and writes `~/.config/plainbrain/env`. If Pi is detected (or you pass `--pi`), it also drops the global rules at `~/.pi/agent/AGENTS.md`, symlinks the skills into `~/.pi/agent/skills/`, and installs the lifecycle extension to `~/.pi/agent/extensions/plainbrain/` (`--no-pi` opts out).
 
 It's all shell — read it before you run it. Re-run it any time; `./update.sh` later refreshes just the kit-owned files (hooks, skills, CLI, template) without touching your config or data.
 
@@ -195,17 +195,15 @@ lifecycle hooks touch an agent's plumbing.
 
 Three parts, three levels of portability:
 
-- **Rules** live in `AGENTS.md` — the cross-tool standard [opencode](https://opencode.ai) and
-  [Pi](https://pi.dev) both read directly. A project's `AGENTS.md` names its driver and is picked up
-  from the repo automatically; the global conventions install to each agent's own home
-  (`~/.config/opencode/AGENTS.md`, `~/.pi/agent/AGENTS.md`). There is no `CLAUDE.md` anywhere in the
-  kit. **Using Claude Code?** It reads only `CLAUDE.md`, so point it at the same rules with a one-line
-  `CLAUDE.md` that imports `@AGENTS.md` (a plain file, not a symlink), or copy the global rules to
-  `~/.claude/CLAUDE.md`. One source of rules either way.
-- **Skills** load from `~/.claude/skills/`. opencode reads that path natively; the installer also
+- **Rules** live in `AGENTS.md` — a cross-tool standard [Pi](https://pi.dev) reads directly. A
+  project's `AGENTS.md` names its driver and is picked up from the repo automatically; the global
+  conventions install to each agent's own home (`~/.claude/CLAUDE.md` for Claude Code,
+  `~/.pi/agent/AGENTS.md` for Pi). **Using Claude Code?** It reads only `CLAUDE.md`, so per project
+  point it at the same rules with a one-line `CLAUDE.md` that imports `@AGENTS.md` (a plain file,
+  not a symlink). One source of rules either way.
+- **Skills** load from `~/.claude/skills/` (Claude Code's native path); the installer also
   symlinks each skill into `~/.pi/agent/skills/` for Pi. You invoke a skill by asking for it by name
-  ("distill", "adopt this project") — opencode matches on the description, Pi exposes it as
-  `/skill:name`.
+  ("distill", "adopt this project"); Pi also exposes it as `/skill:name`.
 - **Lifecycle hooks** are the one agent-specific piece — session start, prompt submit, context
   compaction, session end, tool calls. Claude Code fires the five shell scripts from
   `settings.json`; Pi fires the *same scripts* from a small TypeScript extension the installer
@@ -214,15 +212,16 @@ Three parts, three levels of portability:
 
 So, honestly, where each agent lands today: **Claude Code** — full (hooks via `settings.json`,
 all four gates). **Pi** — full (hooks via the shipped extension; tool gates included, minus the
-stop gate — Pi has no blocking end-of-turn event). **opencode** — rules + skills; no lifecycle
-adapter ships yet, so context injection, WIP snapshots, and gates are the pieces still to write.
+stop gate — Pi has no blocking end-of-turn event). Those two are the tested set. Any other agent
+that reads `AGENTS.md` and runs shell gets the memory and skills layer for free; the lifecycle
+hooks are the one piece each new agent needs a thin adapter for.
 
 The files underneath — `plan.md`, `decisions.md`, the wiki — don't care what reads them. That's the
 point: your accumulated knowledge shouldn't be hostage to this year's tool.
 
 ## Who this is for
 
-**A good fit if you:** live in Claude Code across multiple projects; want to *audit* what your AI remembers; accumulate research/decisions that deserve to outlive chat history; like plain text and git; work across machines (everything syncs as ordinary repos).
+**A good fit if you:** drive a coding agent (Claude Code or Pi) across multiple projects; want to *audit* what your AI remembers; accumulate research/decisions that deserve to outlive chat history; like plain text and git; work across machines (everything syncs as ordinary repos).
 
 **A bad fit if you:** want fully-automatic zero-habit memory (this asks for one habit: "distill"); need true team-concurrent editing of shared knowledge (git merges of prose are mediocre); have a corpus so large it genuinely needs semantic search (see below).
 

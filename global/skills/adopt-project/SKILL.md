@@ -57,5 +57,5 @@ plan.md). Modules are added or dropped later by re-running this skill.
 only the delta — add the missing module, activate (drop `.claude/plainbrain`) if missing, or
 flag one that never earned its keep (dropping needs explicit user OK; git keeps the history). Never overwrite an existing
 plan.md / decisions.md / CONTEXT.md / ARCHITECTURE.md without explicit OK — merge or
-extend instead. Rename any existing `CLAUDE.md` to `AGENTS.md` (opencode reads AGENTS.md); a
+extend instead. Rename any existing `CLAUDE.md` to `AGENTS.md` (Pi reads AGENTS.md); a
 Claude-Code user can add a one-line `@AGENTS.md` CLAUDE.md back if they want.

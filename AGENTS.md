@@ -19,4 +19,4 @@ shell scripts. This repo is the distributable kit (and its own audit trail).
 - The kit dogfoods its own layout: this file is the AGENTS.md every adopted project carries.
 - Keep the substrate dumb (markdown, shell, git); the intelligence is rented at runtime.
 
-Global rules apply (see `~/.config/opencode/AGENTS.md`). Keep this file lean.
+Global rules apply (your agent's global config: `~/.claude/CLAUDE.md` or `~/.pi/agent/AGENTS.md`). Keep this file lean.
