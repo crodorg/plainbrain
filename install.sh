@@ -161,15 +161,19 @@ SET="$CLAUDE/settings.json"
 if [ ! -f "$SET" ]; then
   cp "$KIT/global/settings.json" "$SET"
   note "installed"
-elif grep -q 'session-start\.sh' "$SET" 2>/dev/null; then
+elif grep -q 'gate\.sh' "$SET" 2>/dev/null; then
   note "hooks already wired — skipped"
 elif command -v jq >/dev/null 2>&1; then
+  # Merge per event, skipping kit entries already present — an older install (pre-gate)
+  # gains the new events without duplicating the four it already has.
   backup "$SET"
   jq --slurpfile k "$KIT/global/settings.json" '
     .hooks = ((.hooks // {}) as $h | $k[0].hooks as $kh
-      | reduce ($kh | keys[]) as $e ($h; .[$e] = ((.[$e] // []) + $kh[$e]) ))
+      | reduce ($kh | keys[]) as $e ($h;
+          .[$e] = ((.[$e] // []) + ($kh[$e] | map(select(. as $n
+            | ((($h[$e] // []) | map(tojson)) | index($n | tojson)) == null)))) ))
   ' "$SET" > "$SET.tmp" && mv "$SET.tmp" "$SET"
-  note "merged the hooks block via jq"
+  note "merged the hooks block via jq (existing entries kept)"
 else
   note "no jq — add the \"hooks\" block from $KIT/global/settings.json to $SET yourself"
 fi

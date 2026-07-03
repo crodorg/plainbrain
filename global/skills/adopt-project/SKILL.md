@@ -26,7 +26,9 @@ plan.md). Modules are added or dropped later by re-running this skill.
 2. **Gitignore + activate.** Ensure `.claude/state/` is ignored; `git rm -r --cached` any
    already-tracked markers. Then **activate**: create the tracked `.claude/plainbrain` marker —
    the session hooks (orient, snapshot, distill-reminder) stay INERT until it exists, so
-   un-adopted repos are untouched.
+   un-adopted repos are untouched. If the user wants hard gates (driver-read before edits,
+   why-before-plan-rewrite, plan scope), add an `enforce: on` line to the marker — opt-in,
+   per-project (see the README's Gates section).
 3. **Interview.** FIRST question: what kind of work happens here — building in phases,
    collecting ideas, writing, a creative practice? That picks the modules. Then 3-5
    short questions: current goal or direction, what's in flight, what's locked, what

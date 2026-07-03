@@ -1,5 +1,21 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|MultiEdit|NotebookEdit",
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/gate.sh", "timeout": 10 }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/gate.sh", "timeout": 10 }
+        ]
+      }
+    ],
     "UserPromptSubmit": [
       {
         "matcher": "",

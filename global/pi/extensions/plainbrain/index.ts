@@ -11,6 +11,7 @@
 //   wiki-surface.sh    -> before_agent_start    (per prompt; inject stdout as a message)
 //   pre-compact.sh     -> session_before_compact (snapshot only, no context)
 //   session-end.sh     -> session_shutdown      (snapshot only, no context)
+//   gate.sh            -> tool_call             (opt-in enforcement; deny -> {block, reason})
 //
 // The scripts read a Claude-shaped payload as JSON on stdin. We feed that via the child's
 // stdin (never argv — keeps the prompt text out of `ps`) and run each in ctx.cwd, which the
@@ -22,7 +23,7 @@
 
 import { execFile } from "node:child_process";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 
 const HOOKS = join(process.env.CLAUDE_HOME || join(homedir(), ".claude"), "hooks");
 
@@ -109,6 +110,36 @@ export default function (pi) {
       // snapshot is belt-and-suspenders; never block compaction
     }
     // return undefined -> compaction proceeds normally
+  });
+
+  // Tool gates (opt-in per repo: `enforce: on` in .claude/plainbrain). The same gate.sh
+  // Claude Code fires from PreToolUse; Pi's tool_call event blocks natively. Deny only on
+  // an explicit verdict — any failure (missing script, timeout, bad JSON) fails open.
+  pi.on("tool_call", async (event, ctx) => {
+    try {
+      const tool = { read: "Read", edit: "Edit", write: "Write" }[event?.toolName];
+      const path = event?.input?.path;
+      if (!tool || !path) return;
+      const out = await runHook(
+        "gate.sh",
+        {
+          hook_event_name: "PreToolUse",
+          tool_name: tool,
+          tool_input: { file_path: resolve(ctx.cwd, String(path)) },
+          session_id: sid(ctx),
+          cwd: ctx.cwd,
+        },
+        ctx.cwd,
+        5000,
+      );
+      if (!out.trim()) return;
+      const verdict = JSON.parse(out)?.hookSpecificOutput;
+      if (verdict?.permissionDecision === "deny") {
+        return { block: true, reason: verdict.permissionDecisionReason || "blocked by a plainbrain gate" };
+      }
+    } catch {
+      // gates fail open — enforcement must never break a turn
+    }
   });
 
   // Session teardown: snapshot a dirty tree + flag it for the next session to reconcile.

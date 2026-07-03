@@ -14,6 +14,9 @@ The driver for all work here. **Stable sections** rarely change. **Volatile subs
 
 ### Current focus
 <the active slice of work — this is what changes most. Volatile.>
+<!-- with gates on (`enforce: on` in .claude/plainbrain), an optional machine-read line:
+scope: src/* tests/*
+Edits outside those globs are then blocked; widening scope is a plan change — log why. -->
 
 ## Milestones
 <ordered phases. Stable-ish.>

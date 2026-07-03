@@ -41,7 +41,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 
 | Path | What it is |
 |---|---|
-| `global/hooks/` | 4 hooks, **inert until a repo is adopted**: session-start (inject git state + driver pointer + pending-work flag), pre-compact + session-end (snapshot the tree to a private ref), wiki-surface (on your prompt, inject any wiki page whose tags match the topic — uses python3) |
+| `global/hooks/` | 5 hooks, **inert until a repo is adopted**: session-start (inject git state + driver pointer + pending-work flag), pre-compact + session-end (snapshot the tree to a private ref), wiki-surface (on your prompt, inject any wiki page whose tags match the topic — uses python3), gate (**opt-in** enforcement — see [Gates](#gates--opt-in-enforcement)) |
 | `global/skills/adopt-project/` | Bring any project — new or existing — into the layout: the interview picks the modules that fit; files drafted and approved before written |
 | `global/skills/distill/` | The end-of-session sweep: proposes 0–3 durable wiki/skill/me.md items for your approval, routes them to their homes, commits — you are the noise gate |
 | `global/skills/wiki-ingest/` | Source → wiki: summary page, entity/concept updates, cross-links, contradiction flags, index + log |
@@ -151,6 +151,34 @@ Even if you don't adopt the whole thing, a few pieces stand on their own:
 - **A lazily-loaded self page.** Your standing philosophy, taste, and voice live in one wiki page (`~/wiki/entities/me.md`) behind a one-line global pointer — read when the work is creative or preference-sensitive, never taxing the context of an ordinary debugging session.
 - **Deterministic verification.** `wiki-check.sh` proves the wiki's structural health (dead links, index drift, orphans, pages with no tags that could never surface) with zero AI involvement. Trust, but grep.
 
+## Gates — opt-in enforcement
+
+Everything above is advisory: it works because the model reads the files and follows them.
+Gates make the load-bearing rules structural. Add `enforce: on` to a project's
+`.claude/plainbrain` marker and a fifth hook starts vetoing file edits that break the
+project's own contract:
+
+- **driver-read** — no edits until the driver has actually been read this session.
+- **plan-rewrite** — the driver can't be changed until the why is on record first (a line in
+  `decisions.scratch` or `decisions.md` this session). The plan stops being silently rewritable.
+- **scope** — when the plan's Current focus declares `scope: src/* tests/*`, edits outside
+  those globs are blocked. Widening the scope is a plan change, and the gate says so.
+- **stop** (Claude Code only) — if `plan.md` changed this session, the session can't end
+  until the warm-resume pointer (`next.md`) has been refreshed.
+
+Every check is a file-existence, mtime, or glob comparison in one shell script — no model
+judges the model, nothing phones anywhere. A denial isn't a wall, it's a redirect: the
+reason is fed back to the agent and names the deterministic way forward (read the driver,
+park the why, widen the scope deliberately), so a drifted or confabulated intention gets
+re-grounded in what the files actually say *before* it acts, not after. Rationale stays
+frictionless by design — `decisions.md` and `.claude/state/` are never blocked.
+
+Honest limits: gates guard the file tools, not `bash` — your agent's permission system
+remains the hard wall — and a core-only project (no driver) has nothing to enforce, so
+gates there are inert. This bounds drift; it doesn't make a wrong edit *inside* the
+declared scope impossible. Off by default everywhere: a marker without the line behaves
+exactly as before.
+
 ## Not just Claude
 
 Nothing about the *system* is tied to one agent. The three memories are plain markdown. The
@@ -171,14 +199,15 @@ Three parts, three levels of portability:
   ("distill", "adopt this project") — opencode matches on the description, Pi exposes it as
   `/skill:name`.
 - **Lifecycle hooks** are the one agent-specific piece — session start, prompt submit, context
-  compaction, session end. Claude Code fires the four shell scripts from `settings.json`; Pi fires
-  the *same four scripts* from a small TypeScript extension the installer drops at
-  `~/.pi/agent/extensions/plainbrain/`. The scripts themselves never change — one thin adapter per
-  agent.
+  compaction, session end, tool calls. Claude Code fires the five shell scripts from
+  `settings.json`; Pi fires the *same scripts* from a small TypeScript extension the installer
+  drops at `~/.pi/agent/extensions/plainbrain/`. The scripts themselves never change — one thin
+  adapter per agent.
 
-So, honestly, where each agent lands today: **Claude Code** — full (hooks via `settings.json`).
-**Pi** — full (hooks via the shipped extension). **opencode** — rules + skills; no lifecycle adapter
-ships yet, so its session-start context injection and WIP snapshots are the piece still to write.
+So, honestly, where each agent lands today: **Claude Code** — full (hooks via `settings.json`,
+all four gates). **Pi** — full (hooks via the shipped extension; tool gates included, minus the
+stop gate — Pi has no blocking end-of-turn event). **opencode** — rules + skills; no lifecycle
+adapter ships yet, so context injection, WIP snapshots, and gates are the pieces still to write.
 
 The files underneath — `plan.md`, `decisions.md`, the wiki — don't care what reads them. That's the
 point: your accumulated knowledge shouldn't be hostage to this year's tool.
