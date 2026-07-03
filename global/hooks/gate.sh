@@ -138,8 +138,20 @@ PreToolUse)
         # shellcheck disable=SC2254 — unquoted $g is the point: case does the glob match
         case "$rel" in $g) ok=1 ;; esac
       done
+      # Explicit user ask outside scope: honored via a LOGGED override — an
+      # `override: <why> <path-or-glob>` line written to decisions.scratch this session
+      # (distill folds it into decisions.md, so the exception stays on the record).
+      if [ $ok -eq 0 ] && [ -f .claude/state/decisions.scratch ] \
+        && { [ -z "$sm" ] || [ .claude/state/decisions.scratch -nt "$sm" ]; }; then
+        while IFS= read -r ov; do
+          case "$ov" in override:*) ;; *) continue ;; esac
+          for g in ${ov#override:}; do
+            case "$rel" in $g) ok=1 ;; esac
+          done
+        done < .claude/state/decisions.scratch
+      fi
       set +f
-      [ $ok -eq 0 ] && deny "$rel is outside the plan's current scope (scope: $scope in ./$driver). Work within it, or widen the scope line — that is a plan change: log why in .claude/state/decisions.scratch first. (plainbrain gate: scope)"
+      [ $ok -eq 0 ] && deny "$rel is outside the plan's current scope (scope: $scope in ./$driver). If the user explicitly asked for this, append one line 'override: <why> $rel' to .claude/state/decisions.scratch and retry. Otherwise work within scope, or widen the scope line in ./$driver — a plan change: log why first. (plainbrain gate: scope)"
     fi
   fi
   exit 0

@@ -162,7 +162,11 @@ project's own contract:
 - **plan-rewrite** — the driver can't be changed until the why is on record first (a line in
   `decisions.scratch` or `decisions.md` this session). The plan stops being silently rewritable.
 - **scope** — when the plan's Current focus declares `scope: src/* tests/*`, edits outside
-  those globs are blocked. Widening the scope is a plan change, and the gate says so.
+  those globs are blocked. Widening the scope is a plan change, and the gate says so. An
+  explicit user ask outside the scope doesn't need a plan rewrite: the deny names the escape
+  hatch — log one `override: <why> <path-or-glob>` line to `decisions.scratch` and retry.
+  Overrides are session-scoped and distill folds them into `decisions.md`, so the exception
+  stays on the record instead of silently widening the plan.
 - **stop** (Claude Code only) — if `plan.md` changed this session, the session can't end
   until the warm-resume pointer (`next.md`) has been refreshed.
 
@@ -172,6 +176,9 @@ reason is fed back to the agent and names the deterministic way forward (read th
 park the why, widen the scope deliberately), so a drifted or confabulated intention gets
 re-grounded in what the files actually say *before* it acts, not after. Rationale stays
 frictionless by design — `decisions.md` and `.claude/state/` are never blocked.
+
+Gates bind one project's contract inside that project only: files outside the repo are
+never gated, and un-adopted repos stay untouched as always.
 
 Honest limits: gates guard the file tools, not `bash` — your agent's permission system
 remains the hard wall — and a core-only project (no driver) has nothing to enforce, so
