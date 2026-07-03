@@ -1,4 +1,4 @@
-# Wiki schema (CLAUDE.md for ~/wiki)
+# Wiki schema (AGENTS.md for ~/wiki)
 
 This directory is a **compiled, interlinked knowledge wiki**, co-maintained by you and Claude.
 Claude does the bookkeeping (summarizing, cross-referencing, filing, flagging contradictions);

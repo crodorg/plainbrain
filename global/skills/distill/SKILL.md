@@ -39,7 +39,7 @@ of anything that *should* have been logged inline but wasn't, then one clean com
    destinations and write-rules are all in step 3):
    - **wiki:** knowledge that is durable (true in 6+ months), cross-project, about the world
      (not this repo's internals), and cost real effort to learn (full litmus in
-     `$PLAINBRAIN_WIKI/CLAUDE.md`). Facts go to the wiki; procedures become skills.
+     `$PLAINBRAIN_WIKI/AGENTS.md`). Facts go to the wiki; procedures become skills.
    - **skill — capture:** a repeatable procedure that would cost the next session real time to
      re-derive. Signals: a multi-step sequence that worked only after iteration; a non-obvious
      gotcha you found the workaround for; a convention or recipe the user will reuse; the user

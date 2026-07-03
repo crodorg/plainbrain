@@ -5,7 +5,7 @@ description: Integrate a new source into the wiki knowledge base. Use when the u
 
 # wiki-ingest
 
-The wiki is at `$PLAINBRAIN_WIKI` (default `~/wiki`; read its CLAUDE.md for layout and page
+The wiki is at `$PLAINBRAIN_WIKI` (default `~/wiki`; read its AGENTS.md for layout and page
 formats). Sources live in `$PLAINBRAIN_DATA` (raw/external, default `~/data`) and
 `$PLAINBRAIN_NOTES` (personal, default `~/notes`). Work one source at a time and stay
 collaborative unless told to batch.

@@ -8,7 +8,7 @@ description: Bring a project into the knowledge-system layout — git repo, giti
 Run inside the project directory. Goal: the core plus the modules that earn their keep,
 with real content, nothing clobbered, hooks live. Adoption is a conversation, not a scan.
 
-**Core (every project):** git repo + `AGENTS.md` (+ a one-line `CLAUDE.md` that imports it, for Claude Code) + `decisions.md`.
+**Core (every project):** git repo + `AGENTS.md` + `decisions.md`.
 **Modules (only where they fit):**
 - `plan.md` — there is phased execution to drive (driver for execution projects)
 - `ARCHITECTURE.md` — there is a codebase to map
@@ -35,9 +35,7 @@ plan.md). Modules are added or dropped later by re-running this skill.
    - `AGENTS.md` — merge with existing (keep their rules, add the pointer block from
      the template at `~/.claude/project-template/`). The pointer block lists
      ONLY the files this project carries and names the **driver** (plan.md or
-     CONTEXT.md). Lean. Also drop a one-line `CLAUDE.md` (`@AGENTS.md`) beside it so
-     secondary Claude Code reads the same rules — a plain import, not a symlink; skip it
-     for an opencode-only project. Record the same driver in the `.claude/plainbrain` marker as a
+     CONTEXT.md). Lean. Record the same driver in the `.claude/plainbrain` marker as a
      `driver: <file>` line — the session-start hook reads it, so a CONTEXT-driven hybrid
      that also carries a plan.md isn't mis-detected. Omit the line for a core-only project.
    - `decisions.md` — template header; seed timestamped entries for big already-made
@@ -57,5 +55,5 @@ plan.md). Modules are added or dropped later by re-running this skill.
 only the delta — add the missing module, activate (drop `.claude/plainbrain`) if missing, or
 flag one that never earned its keep (dropping needs explicit user OK; git keeps the history). Never overwrite an existing
 plan.md / decisions.md / CONTEXT.md / ARCHITECTURE.md without explicit OK — merge or
-extend instead. An existing real `CLAUDE.md` keeps working (both agents read it) — rename it
-to `AGENTS.md` + a `@AGENTS.md` stub only if the user wants the cross-tool layout.
+extend instead. Rename any existing `CLAUDE.md` to `AGENTS.md` (opencode reads AGENTS.md); a
+Claude-Code user can add a one-line `@AGENTS.md` CLAUDE.md back if they want.

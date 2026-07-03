@@ -16,4 +16,4 @@
 ## Project rules
 <repo-specific conventions, do/don't, how to run tests, build commands, etc.>
 
-Global rules apply (see `~/.claude/CLAUDE.md`). Keep this file lean.
+Global rules apply (see `~/.config/opencode/AGENTS.md`). Keep this file lean.

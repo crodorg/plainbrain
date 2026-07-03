@@ -5,7 +5,7 @@ description: Health-check the wiki knowledge base. Use periodically to find cont
 
 # wiki-lint
 
-The wiki is at `$PLAINBRAIN_WIKI` (default `~/wiki`; read its CLAUDE.md for layout).
+The wiki is at `$PLAINBRAIN_WIKI` (default `~/wiki`; read its AGENTS.md for layout).
 
 First run the deterministic pre-pass — `wiki-check.sh` in this skill's directory (POSIX, no
 AI): dead relative links, pages missing from `index.md`, missing/invalid frontmatter `type:`,

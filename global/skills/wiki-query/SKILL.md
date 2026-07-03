@@ -5,7 +5,7 @@ description: Answer a question against the wiki knowledge base. Use when the use
 
 # wiki-query
 
-The wiki is at `$PLAINBRAIN_WIKI` (default `~/wiki`; read its CLAUDE.md for layout).
+The wiki is at `$PLAINBRAIN_WIKI` (default `~/wiki`; read its AGENTS.md for layout).
 
 **Scope: wiki-only by default.** Answer from the wiki (plus its `$PLAINBRAIN_DATA`/`$PLAINBRAIN_NOTES` raw sources)
 and nothing else. Do **not** web search or fetch external sources unless the user explicitly asks

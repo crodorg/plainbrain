@@ -1,6 +1,6 @@
-# Global rules (~/.claude/CLAUDE.md)
+# Global rules (~/.config/opencode/AGENTS.md)
 
-Loaded into every session (Claude Code natively; opencode via its `~/.claude/CLAUDE.md` fallback). Keep this short — every line is paid on every
+Loaded into every session. Keep this short — every line is paid on every
 message. These are the plainbrain conventions — merge what you like into your own
 global rules; the project-discipline section is the load-bearing part.
 

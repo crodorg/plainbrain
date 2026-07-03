@@ -3,7 +3,7 @@
 #   ./install.sh            full setup (homes, config, hooks, skills, CLI, template)
 #   ./install.sh --update   refresh only the kit-owned files (hooks, skills, CLI, template)
 #
-# Never clobbers your data or merged config: an existing wiki, ~/.claude/CLAUDE.md, or
+# Never clobbers your data or merged config: an existing wiki, ~/.config/opencode/AGENTS.md, or
 # settings.json is backed up and left for you to merge — only the deterministic kit files
 # are overwritten (and backed up first). jq is used for the settings merge IF present;
 # otherwise the hooks block is printed for you to paste in.
@@ -92,16 +92,19 @@ else
   note "wiki already populated at $WIKI — left as-is"
 fi
 
-# Global CLAUDE.md — write if absent; otherwise back up + leave the kit copy alongside to merge.
-say "global CLAUDE.md ->"
-if [ ! -f "$CLAUDE/CLAUDE.md" ]; then
-  cp "$KIT/global/CLAUDE.md" "$CLAUDE/CLAUDE.md"
-  note "installed"
+# Global rules -> opencode's native global AGENTS.md (write if absent; else leave a .plainbrain-new to merge).
+say "global rules ->"
+OCODE="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+mkdir -p "$OCODE"
+if [ ! -f "$OCODE/AGENTS.md" ]; then
+  cp "$KIT/global/AGENTS.md" "$OCODE/AGENTS.md"
+  note "installed to $OCODE/AGENTS.md"
 else
-  backup "$CLAUDE/CLAUDE.md"
-  cp "$KIT/global/CLAUDE.md" "$CLAUDE/CLAUDE.md.plainbrain-new"
-  note "you already have one — kit copy saved as CLAUDE.md.plainbrain-new; merge what you want"
+  backup "$OCODE/AGENTS.md"
+  cp "$KIT/global/AGENTS.md" "$OCODE/AGENTS.md.plainbrain-new"
+  note "you already have one — kit copy saved as AGENTS.md.plainbrain-new; merge what you want"
 fi
+# Using Claude Code too? It reads only CLAUDE.md — copy this to ~/.claude/CLAUDE.md, or import it.
 
 # settings.json hooks block — merge non-destructively.
 say "settings.json hooks ->"

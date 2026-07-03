@@ -48,11 +48,11 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 | `global/skills/wiki-query/` | Index-first retrieval, cited answers, offers to file durable answers back as new pages |
 | `global/skills/wiki-lint/` | Health check: deterministic `wiki-check.sh` pre-pass (dead links, index drift, orphans, scale advisories) + semantic review |
 | `global/bin/plainbrain` | List, recover, or prune the private-ref snapshots (`plainbrain wip`) |
-| `global/CLAUDE.md` | Lean global rules: plan discipline, git discipline, where things live |
+| `global/AGENTS.md` | Lean global rules: plan discipline, git discipline, where things live |
 | `global/settings.json` | The hook wiring (merged into yours — never overwritten) |
 | `install.sh` / `update.sh` | Idempotent, backup-first installer + kit-file updater |
 | `wiki/` | Wiki scaffold: schema doc, index, overview, people roster |
-| `project-template/` | Core templates (AGENTS.md + a one-line CLAUDE.md that imports it, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
+| `project-template/` | Core templates (AGENTS.md, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
 
 ## Install
 
@@ -64,7 +64,7 @@ cd plainbrain
 ./install.sh
 ```
 
-`install.sh` is idempotent and backup-first — it never clobbers your data or merged config. It creates the four homes and scaffolds an empty wiki, installs the hooks / skills / `plainbrain` CLI / project template into `~/.claude`, installs `global/CLAUDE.md` only if you don't already have one (otherwise saves it as `CLAUDE.md.plainbrain-new` to merge), merges **only** the hooks block into your `settings.json` (with `jq` if present, else prints it to paste — your permissions/env/statusLine are never touched), and writes `~/.config/plainbrain/env`.
+`install.sh` is idempotent and backup-first — it never clobbers your data or merged config. It creates the four homes and scaffolds an empty wiki, installs the hooks / skills / `plainbrain` CLI / project template into `~/.claude`, installs the global rules to `~/.config/opencode/AGENTS.md` only if you don't already have one (otherwise saves them as `AGENTS.md.plainbrain-new` to merge), merges **only** the hooks block into your `settings.json` (with `jq` if present, else prints it to paste — your permissions/env/statusLine are never touched), and writes `~/.config/plainbrain/env`.
 
 It's all shell — read it before you run it. Re-run it any time; `./update.sh` later refreshes just the kit-owned files (hooks, skills, CLI, template) without touching your config or data.
 
@@ -156,15 +156,19 @@ Nothing about the *system* is tied to one agent. The three memories are plain ma
 skills are natural-language instruction files any capable model can follow. Only the four
 lifecycle hooks are wired to a specific agent.
 
-- **Rules.** A project's rules live in `AGENTS.md` — the cross-tool standard that
-  [opencode](https://opencode.ai) and others read directly. Claude Code reads only `CLAUDE.md`, so
-  each project also carries a one-line `CLAUDE.md` that imports it (`@AGENTS.md`) — a plain file,
-  not a symlink, so there's a single source of rules and nothing to keep in sync. The global
-  conventions install to `~/.claude/CLAUDE.md`, which both agents read (Claude natively, opencode
-  as its [documented fallback](https://opencode.ai/docs/rules/)).
+The kit ships opencode-native:
+
+- **Rules** live in `AGENTS.md` — the cross-tool standard [opencode](https://opencode.ai) reads
+  directly. A project's `AGENTS.md` names its driver; the global conventions install to
+  `~/.config/opencode/AGENTS.md`. There is no `CLAUDE.md` anywhere in the kit.
 - **Skills** load from `~/.claude/skills/`. opencode picks one by matching your request to its
   description (via a built-in `skill` tool) rather than a `/`-command — you still just ask for it by
   name ("distill", "adopt this project").
+
+**Using Claude Code?** It reads only `CLAUDE.md`, so point it at the same rules with a one-line
+`CLAUDE.md` next to any `AGENTS.md` (`@AGENTS.md` imports it — a plain file, not a symlink), or just
+rename the file; for the global rules, copy them to `~/.claude/CLAUDE.md`. One source of rules
+either way.
 
 The one agent-specific piece is the four lifecycle hooks — session start, context compaction,
 session end, prompt submit. Claude Code fires them from `settings.json`; another agent re-homes the
