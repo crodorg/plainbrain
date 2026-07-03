@@ -1,4 +1,4 @@
-# Global rules (~/.config/opencode/AGENTS.md)
+# Global rules (your agent's global AGENTS.md)
 
 Loaded into every session. Keep this short — every line is paid on every
 message. These are the plainbrain conventions — merge what you like into your own

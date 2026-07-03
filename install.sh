@@ -2,15 +2,23 @@
 # plainbrain installer — idempotent, backup-first, POSIX sh, no hard deps.
 #   ./install.sh            full setup (homes, config, hooks, skills, CLI, template)
 #   ./install.sh --update   refresh only the kit-owned files (hooks, skills, CLI, template)
+#   flags: --pi / --no-pi   force-enable / -disable the Pi harness target (default: auto-detect)
 #
-# Never clobbers your data or merged config: an existing wiki, ~/.config/opencode/AGENTS.md, or
-# settings.json is backed up and left for you to merge — only the deterministic kit files
-# are overwritten (and backed up first). jq is used for the settings merge IF present;
-# otherwise the hooks block is printed for you to paste in.
+# Never clobbers your data or merged config: an existing wiki, ~/.config/opencode/AGENTS.md,
+# ~/.pi/agent/AGENTS.md, or settings.json is backed up and left for you to merge — only the
+# deterministic kit files are overwritten (and backed up first). jq is used for the settings
+# merge IF present; otherwise the hooks block is printed for you to paste in.
 set -eu
 
 MODE=install
-[ "${1:-}" = "--update" ] && MODE=update
+PI=auto   # auto | yes | no
+for a in "$@"; do
+  case "$a" in
+    --update) MODE=update ;;
+    --pi)     PI=yes ;;
+    --no-pi)  PI=no ;;
+  esac
+done
 
 KIT=$(cd "$(dirname "$0")" && pwd)
 CLAUDE="${CLAUDE_HOME:-$HOME/.claude}"
@@ -19,9 +27,19 @@ DATA="${PLAINBRAIN_DATA:-$HOME/data}"
 PROJECTS="${PLAINBRAIN_PROJECTS:-$HOME/projects}"
 NOTES="${PLAINBRAIN_NOTES:-$HOME/notes}"
 BK="$CLAUDE/.plainbrain-backup/$(date +%Y%m%d-%H%M%S 2>/dev/null || echo backup)"
+PIAGENT="$HOME/.pi/agent"   # Pi's native home (AGENTS.md, skills/, extensions/)
 
 say()  { printf '%s\n' "$*"; }
 note() { printf '  %s\n' "$*"; }
+
+# Whether to wire the Pi harness target. --pi/--no-pi force it; otherwise auto-detect Pi.
+pi_enabled() {
+  case "$PI" in
+    yes) return 0 ;;
+    no)  return 1 ;;
+    *)   command -v pi >/dev/null 2>&1 || [ -d "$HOME/.pi" ] ;;
+  esac
+}
 
 # Back up a path (file or dir) into $BK, mirroring its location under $HOME.
 backup() {
@@ -49,6 +67,24 @@ install_kit() {
     rm -rf "$CLAUDE/skills/$name"; cp -R "$s" "$CLAUDE/skills/$name"
     note "$name"
   done
+
+  # Pi target (kit-owned bits: per-skill symlinks + the lifecycle extension). Refreshed on
+  # --update too. Symlink each skill (Pi resolves symlinks; a symlinked *root* trips a Pi
+  # config display bug) at ~/.claude/skills/<name> — one copy serves both harnesses, and the
+  # stable path survives this function's rm -rf/cp above. AGENTS.md placement is config, done
+  # in first-time setup below (like opencode's).
+  if pi_enabled; then
+    say "pi skills + extension ->"
+    mkdir -p "$PIAGENT/skills" "$PIAGENT/extensions"
+    for s in "$KIT"/global/skills/*/; do   # only the kit's own skills, not the user's other ~/.claude/skills
+      name=$(basename "$s")
+      rm -rf "$PIAGENT/skills/$name"
+      ln -s "$CLAUDE/skills/$name" "$PIAGENT/skills/$name"
+    done
+    rm -rf "$PIAGENT/extensions/plainbrain"; mkdir -p "$PIAGENT/extensions/plainbrain"
+    cp "$KIT/global/pi/extensions/plainbrain/index.ts" "$PIAGENT/extensions/plainbrain/index.ts"
+    note "skills symlinked + plainbrain extension -> $PIAGENT (invoke a skill as /skill:name)"
+  fi
 
   say "project template ->"
   backup "$CLAUDE/project-template"
@@ -106,6 +142,19 @@ else
 fi
 # Using Claude Code too? It reads only CLAUDE.md — copy this to ~/.claude/CLAUDE.md, or import it.
 
+# Pi reads its own global AGENTS.md — same write-if-absent-else-.plainbrain-new logic.
+if pi_enabled; then
+  mkdir -p "$PIAGENT"
+  if [ ! -f "$PIAGENT/AGENTS.md" ]; then
+    cp "$KIT/global/AGENTS.md" "$PIAGENT/AGENTS.md"
+    note "installed to $PIAGENT/AGENTS.md"
+  else
+    backup "$PIAGENT/AGENTS.md"
+    cp "$KIT/global/AGENTS.md" "$PIAGENT/AGENTS.md.plainbrain-new"
+    note "you already have one — kit copy saved as AGENTS.md.plainbrain-new; merge what you want"
+  fi
+fi
+
 # settings.json hooks block — merge non-destructively.
 say "settings.json hooks ->"
 SET="$CLAUDE/settings.json"
@@ -138,4 +187,4 @@ note "to apply overrides, add to your shell rc: [ -f ~/.config/plainbrain/env ] 
 
 say ""
 say "install complete. Backups (if any) in $BK"
-say "Next: open a repo and run \"adopt this project\" in Claude Code to activate it."
+say "Next: open a repo in your agent (Claude Code / Pi / opencode) and run \"adopt this project\" to activate it."
