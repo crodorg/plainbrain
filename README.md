@@ -176,8 +176,9 @@ frictionless by design — `decisions.md` and `.claude/state/` are never blocked
 Honest limits: gates guard the file tools, not `bash` — your agent's permission system
 remains the hard wall — and a core-only project (no driver) has nothing to enforce, so
 gates there are inert. This bounds drift; it doesn't make a wrong edit *inside* the
-declared scope impossible. Off by default everywhere: a marker without the line behaves
-exactly as before.
+declared scope impossible. Default-on for **new** adoptions (adopt-project writes the line);
+a pre-existing marker without the line behaves exactly as before — add `enforce: on` to opt
+an older project in, delete the line to turn gates off.
 
 ## Not just Claude
 
