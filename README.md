@@ -50,7 +50,7 @@ Dumb substrate, smart runtime. Systems built the other way around — smart subs
 | `global/bin/plainbrain` | List, recover, or prune the private-ref snapshots (`plainbrain wip`) |
 | `global/AGENTS.md` | Lean global rules: plan discipline, git discipline, where things live |
 | `global/settings.json` | The Claude Code hook wiring (merged into yours — never overwritten) |
-| `global/pi/extensions/plainbrain/` | Pi lifecycle adapter — fires the same four hook scripts from Pi's extension events (installed only when Pi is present) |
+| `global/pi/extensions/plainbrain/` | Pi lifecycle adapter — fires the same five hook scripts from Pi's extension events (installed only when Pi is present) |
 | `install.sh` / `update.sh` | Idempotent, backup-first installer + kit-file updater |
 | `wiki/` | Wiki scaffold: schema doc, index, overview, people roster |
 | `project-template/` | Core templates (AGENTS.md, decisions.md) + the modules (plan.md, CONTEXT.md, ARCHITECTURE.md) |
@@ -190,7 +190,7 @@ an older project in, delete the line to turn gates off.
 ## Not just Claude
 
 Nothing about the *system* is tied to one agent. The three memories are plain markdown. The
-skills are natural-language instruction files any capable model can follow. Only the four
+skills are natural-language instruction files any capable model can follow. Only the five
 lifecycle hooks touch an agent's plumbing.
 
 Three parts, three levels of portability:
